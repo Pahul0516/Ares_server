@@ -34,9 +34,6 @@
         <sonar.organization>pahul0516</sonar.organization>
         <sonar.host.url>https://sonarcloud.io</sonar.host.url>
 
-        <!-- Path to Jacoco report generated during tests -->
-        <sonar.jacoco.reportPaths>target/jacoco.exec</sonar.jacoco.reportPaths>
-
         <!-- Path to JUnit reports (required for test results in SonarCloud) -->
         <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
