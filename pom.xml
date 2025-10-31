@@ -38,9 +38,10 @@
         <sonar.jacoco.reportPaths>target/jacoco.exec</sonar.jacoco.reportPaths>
 
         <!-- Path to JUnit reports (required for test results in SonarCloud) -->
-        <sonar.junit.reportPaths>target/test-classes</sonar.junit.reportPaths>
+        <sonar.coverage.jacoco.xmlReportPaths>target/site/jacoco/jacoco.xml</sonar.coverage.jacoco.xmlReportPaths>
 
     </properties>
+
     <dependencies>
 
         <dependency>
@@ -69,23 +70,21 @@
                 <artifactId>spring-boot-maven-plugin</artifactId>
             </plugin>
 
-            <!-- Jacoco Maven Plugin for code coverage -->
+            <!-- JaCoCo plugin -->
             <plugin>
                 <groupId>org.jacoco</groupId>
                 <artifactId>jacoco-maven-plugin</artifactId>
                 <version>0.8.9</version>
                 <executions>
-                    <!-- Prepare Jacoco agent for coverage data collection -->
                     <execution>
-                        <id>prepare-agent</id>  <!-- Unique ID for this execution -->
+                        <id>prepare-agent</id>
                         <goals>
                             <goal>prepare-agent</goal>
                         </goals>
                     </execution>
-
-                    <!-- Generate coverage report -->
                     <execution>
-                        <id>generate-report</id>  <!-- Unique ID for this execution -->
+                        <id>report</id>
+                        <phase>verify</phase>
                         <goals>
                             <goal>report</goal>
                         </goals>
