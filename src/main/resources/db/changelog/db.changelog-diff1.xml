@@ -1,0 +1,46 @@
+<?xml version="1.1" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns="http://www.liquibase.org/xml/ns/dbchangelog" xmlns:ext="http://www.liquibase.org/xml/ns/dbchangelog-ext" xmlns:pro="http://www.liquibase.org/xml/ns/pro" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog-ext http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-ext.xsd http://www.liquibase.org/xml/ns/pro http://www.liquibase.org/xml/ns/pro/liquibase-pro-latest.xsd http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-latest.xsd">
+    <changeSet author="berin (generated)" id="1762362308539-9">
+        <dropForeignKeyConstraint baseTableName="runs" constraintName="runs_owner_fkey"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-10">
+        <dropForeignKeyConstraint baseTableName="zones" constraintName="zones_owner_fkey"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-3">
+        <createSequence incrementBy="1" sequenceName="runs_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-4">
+        <createSequence incrementBy="1" sequenceName="zones_id_seq" startValue="1"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-5">
+        <createTable tableName="users">
+            <column name="id" type="UUID">
+                <constraints nullable="false" primaryKey="true" primaryKeyName="usersPK"/>
+            </column>
+            <column name="email" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+            <column name="encrypted_password" type="VARCHAR(255)">
+                <constraints nullable="false"/>
+            </column>
+        </createTable>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-6">
+        <addForeignKeyConstraint baseColumnNames="owner" baseTableName="runs" constraintName="run_owner_fkey" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-7">
+        <addForeignKeyConstraint baseColumnNames="id" baseTableName="users_info" constraintName="user_userinfo_fkey" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-8">
+        <addForeignKeyConstraint baseColumnNames="owner" baseTableName="zones" constraintName="zones_owner_fkey" deferrable="false" initiallyDeferred="false" referencedColumnNames="id" referencedTableName="users" validate="true"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-14">
+        <dropColumn columnName="username" tableName="users_info"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-1">
+        <addNotNullConstraint columnDataType="uuid" columnName="owner" tableName="runs" validate="true"/>
+    </changeSet>
+    <changeSet author="berin (generated)" id="1762362308539-2">
+        <addNotNullConstraint columnDataType="uuid" columnName="owner" tableName="zones" validate="true"/>
+    </changeSet>
+</databaseChangeLog>
