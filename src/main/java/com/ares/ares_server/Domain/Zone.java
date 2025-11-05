@@ -31,10 +31,6 @@ public class Zone {
     @Column(name = "last_updated", nullable = false)
     private OffsetDateTime lastUpdated;
 
-    @ColumnDefault("auth.uid()")
-    @Column(name = "owner")
-    private UUID owner;
-
     @NotNull
     @Column(name = "polygon", nullable = false)
     private Polygon polygon;
@@ -42,5 +38,9 @@ public class Zone {
     @ColumnDefault("st_area(st_transform(polygon, 3857))")
     @Column(name = "area")
     private Double area;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false,foreignKey = @ForeignKey(name = "zones_owner_fkey"))
+    private User owner;
 
 }

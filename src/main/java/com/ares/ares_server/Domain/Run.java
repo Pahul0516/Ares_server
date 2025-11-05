@@ -28,8 +28,9 @@ public class Run {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @Column(name = "owner")
-    private UUID owner;
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "run_owner_fkey"))
+    private User owner;
 
     @Column(name = "distance")
     private Float distance;
@@ -40,8 +41,9 @@ public class Run {
     @Column(name = "polygon")
     private Polygon polygon;
 
-    @Column(name = "description")
-    private String description;
+    @Column(name = "duration")
+    private Instant duration;
+
 
 
 }
