@@ -7,6 +7,11 @@
         <createSequence incrementBy="1" sequenceName="zones_id_seq" startValue="1"/>
     </changeSet>
     <changeSet author="berin (generated)" id="1762365481957-3">
+        <preConditions onFail="MARK_RAN" onError="MARK_RAN">
+            <not>
+                <columnExists tableName="users" columnName="username"/>
+            </not>
+        </preConditions>
         <addColumn tableName="users">
             <column name="username" type="VARCHAR(255)">
                 <constraints nullable="false"/>
