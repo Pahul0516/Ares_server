@@ -35,7 +35,7 @@ public class ZoneController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Zone created successfully"),
-            @ApiResponse(responseCode = "400", description = "Invalid input data provided"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data provided")
     })
     @PostMapping
     public ResponseEntity<Zone> createZone(@RequestBody Zone zone) {
