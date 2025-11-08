@@ -1,5 +1,6 @@
 package com.ares.ares_server.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -8,7 +9,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Polygon;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -32,6 +32,7 @@ public class Zone {
     private OffsetDateTime lastUpdated;
 
     @NotNull
+    @JsonIgnore
     @Column(name = "polygon", nullable = false)
     private Polygon polygon;
 

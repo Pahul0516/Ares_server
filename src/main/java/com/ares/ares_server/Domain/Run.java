@@ -1,5 +1,6 @@
 package com.ares.ares_server.Domain;
 
+import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -28,7 +29,7 @@ public class Run {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "run_owner_fkey"))
     private User owner;
 
@@ -38,12 +39,11 @@ public class Run {
     @Column(name = "area_gained")
     private Float areaGained;
 
+    @JsonIgnore
     @Column(name = "polygon")
     private Polygon polygon;
 
     @Column(name = "duration")
     private Instant duration;
-
-
 
 }
