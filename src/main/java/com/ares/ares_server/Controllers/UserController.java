@@ -22,6 +22,7 @@ public class UserController {
     @Autowired
     private UserRepositroy userRepository;
 
+
     /**
      * Register( signup) a new user
      *
@@ -60,7 +61,7 @@ public class UserController {
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200",description = "User logged in successfully"),
-            @ApiResponse(responseCode = "401",description = "Incalid credentials")
+            @ApiResponse(responseCode = "401",description = "Invalid credentials")
     })
     @PostMapping("/login")
     public ResponseEntity<User> login(@RequestBody User userLogin){
