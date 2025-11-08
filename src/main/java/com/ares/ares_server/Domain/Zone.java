@@ -8,7 +8,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Polygon;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter

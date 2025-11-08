@@ -131,6 +131,14 @@
             <artifactId>geolatte-geom</artifactId>
             <version>${geolatte.version}</version>
         </dependency>
+
+        <!-- USe for serialize geometrical data -->
+        <dependency>
+            <groupId>org.n52.jackson</groupId>
+            <artifactId>jackson-datatype-jts</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>
@@ -221,7 +229,7 @@
                 </dependencies>
 
                 <configuration>
-                    <url>jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres</url>
+                    <url>jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres</url>
                     <username>postgres.qqigierkjpakicqyhhoy</username>
                     <password>o&amp;Nri%qQH9SV364KB1^SEA6lQimvW&amp;EFu@U</password>
                     <driver>org.postgresql.Driver</driver>

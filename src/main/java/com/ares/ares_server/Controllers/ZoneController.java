@@ -3,7 +3,6 @@ package com.ares.ares_server.Controllers;
 import com.ares.ares_server.Domain.Zone;
 import com.ares.ares_server.Repository.ZoneRepository;
 import io.swagger.v3.oas.annotations.Operation;
-import io.swagger.v3.oas.annotations.Parameter;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import org.springframework.beans.factory.annotation.Autowired;
