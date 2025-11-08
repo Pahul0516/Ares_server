@@ -1,6 +1,5 @@
 package com.ares.ares_server.Domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -11,7 +10,6 @@ import org.locationtech.jts.geom.Polygon;
 
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -39,7 +37,6 @@ public class Run {
     @Column(name = "area_gained")
     private Float areaGained;
 
-    @JsonIgnore
     @Column(name = "polygon")
     private Polygon polygon;
 

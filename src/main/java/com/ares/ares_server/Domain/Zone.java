@@ -1,6 +1,5 @@
 package com.ares.ares_server.Domain;
 
-import com.fasterxml.jackson.annotation.JsonIgnore;
 import jakarta.persistence.*;
 import jakarta.validation.constraints.NotNull;
 import lombok.Getter;
@@ -32,7 +31,6 @@ public class Zone {
     private OffsetDateTime lastUpdated;
 
     @NotNull
-    @JsonIgnore
     @Column(name = "polygon", nullable = false)
     private Polygon polygon;
 
