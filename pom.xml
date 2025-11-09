@@ -229,13 +229,8 @@
                 </dependencies>
 
                 <configuration>
-                    <url>jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:5432/postgres</url>
-                    <username>postgres.qqigierkjpakicqyhhoy</username>
-                    <password>o&amp;Nri%qQH9SV364KB1^SEA6lQimvW&amp;EFu@U</password>
-                    <driver>org.postgresql.Driver</driver>
-                    <changeLogFile>src/main/resources/db/db.changelog-master.xml</changeLogFile>
-                    <referenceUrl>hibernate:spring:com.ares.ares_server.Domain?dialect=org.hibernate.dialect.PostgreSQLDialect</referenceUrl>
-                    <diffChangeLogFile>src/main/resources/db/changelog/db.changelog-diff.xml</diffChangeLogFile>
+                    <!-- The properties file will supply DB, referenceUrl, etc. -->
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
                 </configuration>
             </plugin>
         </plugins>
