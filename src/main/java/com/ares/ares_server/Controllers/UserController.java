@@ -12,6 +12,7 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/users")
@@ -19,6 +20,10 @@ public class UserController {
 
     @Autowired
     private UserRepositroy userRepository;
+
+    public UserController(UserRepositroy userRepository) {
+        this.userRepository = userRepository;
+    }
 
 
     /**
@@ -131,7 +136,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<User> getUserById(@PathVariable UUID id) {
         Optional<User> user = userRepository.findById(id);
         return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
@@ -151,7 +156,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+    public ResponseEntity<User> updateUser(@PathVariable UUID id, @RequestBody User updatedUser) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -179,7 +184,7 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         if (!userRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -202,6 +207,7 @@ public class UserController {
     @ApiResponse(responseCode = "200", description = "Password reset link sent")
     @PostMapping("/forgot-password")
     public ResponseEntity<String> forgotPassword(@RequestBody String email) {
+        email = email.replace("\"", ""); // remove surrounding quotes
         return new ResponseEntity<>("Password reset link sent to " + email, HttpStatus.OK);
     }
 
@@ -229,7 +235,7 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "Password changed successfully")
     @PatchMapping("/{id}/change-password")
-    public ResponseEntity<String> changePassword(@PathVariable Long id, @RequestBody String newPassword) {
+    public ResponseEntity<String> changePassword(@PathVariable UUID id, @RequestBody String newPassword) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
