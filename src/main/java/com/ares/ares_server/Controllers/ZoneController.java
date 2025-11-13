@@ -1,5 +1,7 @@
 package com.ares.ares_server.Controllers;
 
+import com.ares.ares_server.DTOs.ZoneDTO;
+import com.ares.ares_server.DTOs.Mappers.ZoneMapper;
 import com.ares.ares_server.Domain.Zone;
 import com.ares.ares_server.Repository.ZoneRepository;
 import io.swagger.v3.oas.annotations.Operation;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/zones")
@@ -21,12 +24,9 @@ public class ZoneController {
     @Autowired
     private ZoneRepository zoneRepository;
 
-    /**
-     * Create a new zone in the system.
-     *
-     * @param zone The zone object to be created.
-     * @return ResponseEntity containing the created zone with HTTP status 201 (Created).
-     */
+    @Autowired
+    private ZoneMapper zoneMapper;
+
     @Operation(
             summary = "Create a new Zone",
             description = "Create a new zone in the system. This will save a new zone in the database.",
@@ -37,16 +37,12 @@ public class ZoneController {
             @ApiResponse(responseCode = "400", description = "Invalid input data provided")
     })
     @PostMapping
-    public ResponseEntity<Zone> createZone(@RequestBody Zone zone) {
+    public ResponseEntity<ZoneDTO> createZone(@RequestBody ZoneDTO zoneDto) {
+        Zone zone = zoneMapper.fromDto(zoneDto);
         Zone savedZone = zoneRepository.save(zone);
-        return new ResponseEntity<>(savedZone, HttpStatus.CREATED);
+        return new ResponseEntity<>(zoneMapper.toDto(savedZone), HttpStatus.CREATED);
     }
 
-    /**
-     * Get all zones from the system.
-     *
-     * @return ResponseEntity containing the list of all zones.
-     */
     @Operation(
             summary = "Retrieve all Zones",
             description = "Fetch all zones present in the system.",
@@ -57,17 +53,14 @@ public class ZoneController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<List<Zone>> getAllZones() {
+    public ResponseEntity<List<ZoneDTO>> getAllZones() {
         List<Zone> zones = zoneRepository.findAll();
-        return new ResponseEntity<>(zones, HttpStatus.OK);
+        List<ZoneDTO> zoneDtos = zones.stream()
+                .map(zoneMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(zoneDtos, HttpStatus.OK);
     }
 
-    /**
-     * Get a zone by its unique ID.
-     *
-     * @param id The ID of the zone to retrieve.
-     * @return ResponseEntity containing the zone if found, otherwise 404 Not Found.
-     */
     @Operation(
             summary = "Get Zone by ID",
             description = "Retrieve a zone using its unique identifier (ID).",
@@ -78,21 +71,12 @@ public class ZoneController {
             @ApiResponse(responseCode = "404", description = "Zone not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Zone> getZoneById(@PathVariable Long id) {
+    public ResponseEntity<ZoneDTO> getZoneById(@PathVariable Long id) {
         Optional<Zone> zone = zoneRepository.findById(id);
-        if (zone.isPresent()) {
-            return new ResponseEntity<>(zone.get(), HttpStatus.OK);
-        } else {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
+        return zone.map(value -> new ResponseEntity<>(zoneMapper.toDto(value), HttpStatus.OK))
+                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
 
-    /**
-     * Get zones by a specific owner.
-     *
-     * @param ownerId The owner ID to filter zones.
-     * @return List of zones belonging to the specific owner.
-     */
     @Operation(
             summary = "Get Zones by Owner",
             description = "Retrieve all zones owned by a specific owner.",
@@ -103,18 +87,14 @@ public class ZoneController {
             @ApiResponse(responseCode = "404", description = "Owner not found")
     })
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<Zone>> getZonesByOwner(@PathVariable UUID ownerId) {
+    public ResponseEntity<List<ZoneDTO>> getZonesByOwner(@PathVariable UUID ownerId) {
         List<Zone> zones = zoneRepository.findByOwnerId(ownerId);
-        return new ResponseEntity<>(zones, HttpStatus.OK);
+        List<ZoneDTO> zoneDtos = zones.stream()
+                .map(zoneMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(zoneDtos, HttpStatus.OK);
     }
 
-    /**
-     * Update an existing zone by ID.
-     *
-     * @param id The ID of the zone to be updated.
-     * @param updatedZone The new zone data for update.
-     * @return ResponseEntity containing the updated zone, or 404 if zone not found.
-     */
     @Operation(
             summary = "Update Zone",
             description = "Update an existing zone by its unique ID.",
@@ -126,21 +106,16 @@ public class ZoneController {
             @ApiResponse(responseCode = "400", description = "Invalid zone data provided")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Zone> updateZone(@PathVariable Long id, @RequestBody Zone updatedZone) {
+    public ResponseEntity<ZoneDTO> updateZone(@PathVariable Long id, @RequestBody ZoneDTO updatedZoneDto) {
         if (!zoneRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
+        Zone updatedZone = zoneMapper.fromDto(updatedZoneDto);
         updatedZone.setId(id); // Ensure the ID is set for update
         Zone savedZone = zoneRepository.save(updatedZone);
-        return new ResponseEntity<>(savedZone, HttpStatus.OK);
+        return new ResponseEntity<>(zoneMapper.toDto(savedZone), HttpStatus.OK);
     }
 
-    /**
-     * Delete a zone by its ID.
-     *
-     * @param id The ID of the zone to be deleted.
-     * @return ResponseEntity with 204 status code for successful deletion.
-     */
     @Operation(
             summary = "Delete Zone",
             description = "Delete a zone from the system by its unique ID.",

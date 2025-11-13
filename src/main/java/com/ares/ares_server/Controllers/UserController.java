@@ -1,5 +1,7 @@
 package com.ares.ares_server.Controllers;
 
+import com.ares.ares_server.DTOs.UserDTO;
+import com.ares.ares_server.DTOs.Mappers.UserMapper;
 import com.ares.ares_server.Domain.User;
 import com.ares.ares_server.Repository.UserRepositroy;
 import io.swagger.v3.oas.annotations.Operation;
@@ -12,6 +14,8 @@ import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
 import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/users")
@@ -20,11 +24,13 @@ public class UserController {
     @Autowired
     private UserRepositroy userRepository;
 
+    @Autowired
+    private UserMapper userMapper;
 
     /**
      * Register( signup) a new user
      *
-     * @param user The new user to create.
+     * @param userDto The new user to create.
      * @return ResponseEntity containing the created user with HTTP status 201 (Created).
      * */
     @Operation(
@@ -37,19 +43,19 @@ public class UserController {
             @ApiResponse(responseCode = "400",description = "Invalid user data")
     })
     @PostMapping("/signup")
-    public ResponseEntity<User> signup(@RequestBody User user){
-        if(userRepository.existsByEmail(user.getEmail())){
+    public ResponseEntity<UserDTO> signup(@RequestBody UserDTO userDto){
+        if(userRepository.existsByEmail(userDto.getEmail())){
             return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
         }
+        User user = userMapper.fromDto(userDto);
         User savedUser = userRepository.save(user);
-        return new ResponseEntity<>(savedUser, HttpStatus.CREATED);
+        return new ResponseEntity<>(userMapper.toDto(savedUser), HttpStatus.CREATED);
     }
-
 
     /**
      * User login.
      *
-     * @param userLogin The user login request contaiining email and password.
+     * @param userLogin The user login request containing email and password.
      * @return ResponseEntity with user if authenticated, otherwise 401 Unauthorized.
      */
     @Operation(
@@ -62,18 +68,17 @@ public class UserController {
             @ApiResponse(responseCode = "401",description = "Invalid credentials")
     })
     @PostMapping("/login")
-    public ResponseEntity<User> login(@RequestBody User userLogin){
+    public ResponseEntity<UserDTO> login(@RequestBody UserDTO userLogin){
         Optional<User> user = userRepository.findByUsername(userLogin.getUsername());
         if(user.isPresent() && user.get().getEncryptedPassword().equals(userLogin.getEncryptedPassword())){
-            return new ResponseEntity<>(user.get(), HttpStatus.OK);
+            return new ResponseEntity<>(userMapper.toDto(user.get()), HttpStatus.OK);
         }
         return new ResponseEntity<>(HttpStatus.UNAUTHORIZED);
     }
 
-
     /**
      * TODO
-     * Logout endoint( placeholder,token-based logout can be added later)
+     * Logout endpoint (placeholder, token-based logout can be added later)
      */
     @Operation(
             summary = "User Logout",
@@ -85,8 +90,6 @@ public class UserController {
     public ResponseEntity<String> logout(){
         return new ResponseEntity<>("User logged out",HttpStatus.OK);
     }
-
-
 
     /**
      * TODO
@@ -113,8 +116,11 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "Users retrieved successfully")
     @GetMapping
-    public ResponseEntity<List<User>> getAllUsers() {
-        List<User> users = userRepository.findAll();
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<UserDTO> users = userRepository.findAll()
+                .stream()
+                .map(userMapper::toDto)
+                .collect(Collectors.toList());
         return new ResponseEntity<>(users, HttpStatus.OK);
     }
 
@@ -131,12 +137,11 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<User> getUserById(@PathVariable Long id) {
+    public ResponseEntity<UserDTO> getUserById(@PathVariable UUID id) {
         Optional<User> user = userRepository.findById(id);
-        return user.map(value -> new ResponseEntity<>(value, HttpStatus.OK))
+        return user.map(value -> new ResponseEntity<>(userMapper.toDto(value), HttpStatus.OK))
                 .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
     }
-
 
     /**
      * Update user information.
@@ -151,20 +156,19 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<User> updateUser(@PathVariable Long id, @RequestBody User updatedUser) {
+    public ResponseEntity<UserDTO> updateUser(@PathVariable UUID id, @RequestBody UserDTO updatedUserDto) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
 
         User user = userOpt.get();
-        user.setEmail(updatedUser.getEmail());
-        user.setUsername(updatedUser.getUsername());
+        user.setEmail(updatedUserDto.getEmail());
+        user.setUsername(updatedUserDto.getUsername());
         User savedUser = userRepository.save(user);
 
-        return new ResponseEntity<>(savedUser, HttpStatus.OK);
+        return new ResponseEntity<>(userMapper.toDto(savedUser), HttpStatus.OK);
     }
-
 
     /**
      * Delete user by ID.
@@ -179,16 +183,13 @@ public class UserController {
             @ApiResponse(responseCode = "404", description = "User not found")
     })
     @DeleteMapping("/{id}")
-    public ResponseEntity<Void> deleteUser(@PathVariable Long id) {
+    public ResponseEntity<Void> deleteUser(@PathVariable UUID id) {
         if (!userRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
         userRepository.deleteById(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
-
-
-
 
     /**
      * TODO
@@ -229,7 +230,7 @@ public class UserController {
     )
     @ApiResponse(responseCode = "200", description = "Password changed successfully")
     @PatchMapping("/{id}/change-password")
-    public ResponseEntity<String> changePassword(@PathVariable Long id, @RequestBody String newPassword) {
+    public ResponseEntity<String> changePassword(@PathVariable UUID id, @RequestBody String newPassword) {
         Optional<User> userOpt = userRepository.findById(id);
         if (userOpt.isEmpty()) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
@@ -239,8 +240,4 @@ public class UserController {
         userRepository.save(user);
         return new ResponseEntity<>("Password changed successfully", HttpStatus.OK);
     }
-
-
-
-
 }

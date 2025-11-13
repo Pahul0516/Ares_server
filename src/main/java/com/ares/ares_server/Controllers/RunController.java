@@ -1,6 +1,8 @@
 package com.ares.ares_server.Controllers;
 
+import com.ares.ares_server.DTOs.RunDTO;
 import com.ares.ares_server.Domain.Run;
+import com.ares.ares_server.DTOs.Mappers.RunMapper;
 import com.ares.ares_server.Repository.RunRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -13,6 +15,7 @@ import org.springframework.web.bind.annotation.*;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
+import java.util.stream.Collectors;
 
 @RestController
 @RequestMapping("/api/runs")
@@ -21,10 +24,13 @@ public class RunController {
     @Autowired
     private RunRepository runRepository;
 
+    @Autowired
+    private RunMapper runMapper;
+
     /**
      * Create a new run in the system.
      *
-     * @param run The run object to be created.
+     * @param runDto The run object to be created.
      * @return ResponseEntity containing the created run with HTTP status 201 (Created).
      */
     @Operation(
@@ -37,9 +43,10 @@ public class RunController {
             @ApiResponse(responseCode = "400", description = "Invalid input data provided")
     })
     @PostMapping
-    public ResponseEntity<Run> createRun(@RequestBody Run run) {
+    public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
+        Run run = runMapper.fromDto(runDto);
         Run savedRun = runRepository.save(run);
-        return new ResponseEntity<>(savedRun, HttpStatus.CREATED);
+        return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
     }
 
     /**
@@ -57,9 +64,12 @@ public class RunController {
             @ApiResponse(responseCode = "500", description = "Internal server error")
     })
     @GetMapping
-    public ResponseEntity<List<Run>> getAllRuns() {
+    public ResponseEntity<List<RunDTO>> getAllRuns() {
         List<Run> runs = runRepository.findAll();
-        return new ResponseEntity<>(runs, HttpStatus.OK);
+        List<RunDTO> runDtos = runs.stream()
+                .map(runMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(runDtos, HttpStatus.OK);
     }
 
     /**
@@ -78,10 +88,10 @@ public class RunController {
             @ApiResponse(responseCode = "404", description = "Run not found")
     })
     @GetMapping("/{id}")
-    public ResponseEntity<Run> getRunById(@PathVariable Long id) {
+    public ResponseEntity<RunDTO> getRunById(@PathVariable Long id) {
         Optional<Run> run = runRepository.findById(id);
         if (run.isPresent()) {
-            return new ResponseEntity<>(run.get(), HttpStatus.OK);
+            return new ResponseEntity<>(runMapper.toDto(run.get()), HttpStatus.OK);
         } else {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
@@ -103,16 +113,19 @@ public class RunController {
             @ApiResponse(responseCode = "404", description = "Owner not found")
     })
     @GetMapping("/owner/{ownerId}")
-    public ResponseEntity<List<Run>> getRunsByOwner(@PathVariable UUID ownerId) {
+    public ResponseEntity<List<RunDTO>> getRunsByOwner(@PathVariable UUID ownerId) {
         List<Run> runs = runRepository.findByOwnerId(ownerId);
-        return new ResponseEntity<>(runs, HttpStatus.OK);
+        List<RunDTO> runDtos = runs.stream()
+                .map(runMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(runDtos, HttpStatus.OK);
     }
 
     /**
      * Update an existing run by ID.
      *
      * @param id The ID of the run to be updated.
-     * @param updatedRun The new run data for update.
+     * @param updatedRunDto The new run data for update.
      * @return ResponseEntity containing the updated run, or 404 if run not found.
      */
     @Operation(
@@ -126,13 +139,14 @@ public class RunController {
             @ApiResponse(responseCode = "400", description = "Invalid run data provided")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<Run> updateRun(@PathVariable Long id, @RequestBody Run updatedRun) {
+    public ResponseEntity<RunDTO> updateRun(@PathVariable Long id, @RequestBody RunDTO updatedRunDto) {
         if (!runRepository.existsById(id)) {
             return new ResponseEntity<>(HttpStatus.NOT_FOUND);
         }
-        updatedRun.setId(id); // Ensure the ID is set for update
-        Run savedRun = runRepository.save(updatedRun);
-        return new ResponseEntity<>(savedRun, HttpStatus.OK);
+        Run runToUpdate = runMapper.fromDto(updatedRunDto);
+        runToUpdate.setId(id);
+        Run savedRun = runRepository.save(runToUpdate);
+        return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.OK);
     }
 
     /**
