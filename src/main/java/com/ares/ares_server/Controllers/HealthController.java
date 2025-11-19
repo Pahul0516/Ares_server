@@ -10,11 +10,6 @@ import org.springframework.web.bind.annotation.RequestMethod;
 @RequestMapping("/api/health")
 public class HealthController {
 
-    @GetMapping("/check")
-    public ResponseEntity<String> checkHealth() {
-        return ResponseEntity.ok("Healthy");
-    }
-
     @RequestMapping(value = "/check", method = RequestMethod.HEAD)
     public ResponseEntity<Void> headCheck() {
         return ResponseEntity.ok().build();

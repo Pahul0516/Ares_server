@@ -3,7 +3,7 @@ package com.ares.ares_server.Controllers;
 import com.ares.ares_server.DTOs.UserDTO;
 import com.ares.ares_server.DTOs.Mappers.UserMapper;
 import com.ares.ares_server.Domain.User;
-import com.ares.ares_server.Repository.UserRepositroy;
+import com.ares.ares_server.Repository.UserRepository;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -22,7 +22,7 @@ import java.util.stream.Collectors;
 public class UserController {
 
     @Autowired
-    private UserRepositroy userRepository;
+    private UserRepository userRepository;
 
     @Autowired
     private UserMapper userMapper;
