@@ -23,5 +23,4 @@ public class User {
 
     @Column(name = "encrypted_password", nullable = false)
     private String encryptedPassword;
-
 }

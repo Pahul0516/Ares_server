@@ -1,19 +1,19 @@
-package com.ares.ares_server.Controllers;
-
-import com.fasterxml.jackson.databind.ObjectMapper;
-import org.junit.jupiter.api.Test;
-import org.springframework.beans.factory.annotation.Autowired;
-import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
-import org.springframework.http.MediaType;
-import org.springframework.test.web.servlet.MockMvc;
-
-import static org.hamcrest.Matchers.*;
-import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
-import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
-
+//package com.ares.ares_server.Controllers;
+//
+//import com.fasterxml.jackson.databind.ObjectMapper;
+//import org.junit.jupiter.api.Test;
+//import org.springframework.beans.factory.annotation.Autowired;
+//import org.springframework.boot.test.autoconfigure.web.servlet.WebMvcTest;
+//import org.springframework.http.MediaType;
+//import org.springframework.test.web.servlet.MockMvc;
+//
+//import static org.hamcrest.Matchers.*;
+//import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
+//import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
+//
 //@WebMvcTest(HelloController.class)
-public class HelloControllerTest {
-
+//public class HelloControllerTest {
+//
 //    @Autowired
 //    private MockMvc mockMvc;
 //
@@ -85,14 +85,14 @@ public class HelloControllerTest {
 //                .andExpect(jsonPath("$.name", is("Bob")));
 //    }
 //
-////    @Test
-////    public void testDeleteUser() throws Exception {
-////        addUser("Alice");
-////
-////        mockMvc.perform(delete("/api/users/0"))
-////                .andExpect(status().isOk())
-////                .andExpect(content().string("User deleted: Alice"));
-////    }
+//    @Test
+//    public void testDeleteUser() throws Exception {
+//        addUser("Alice");
+//
+//        mockMvc.perform(delete("/api/users/0"))
+//                .andExpect(status().isOk())
+//                .andExpect(content().string("User deleted: Alice"));
+//    }
 //
 //    @Test
 //    public void testGetUserNotFound() throws Exception {
@@ -115,4 +115,4 @@ public class HelloControllerTest {
 //                .andExpect(status().isNotFound())
 //                .andExpect(content().string("User not found"));
 //    }
-}
+//}
