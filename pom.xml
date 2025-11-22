@@ -125,6 +125,12 @@
             <scope>test</scope>
         </dependency>
 
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
         <!-- Use Geolatte at runtime so Hibernate Spatial's default provider classes are available -->
         <dependency>
             <groupId>org.geolatte</groupId>
@@ -233,6 +239,16 @@
                 <version>3.9.1.2184</version>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
             <!-- Liquibase Maven plugin with additional plugin-dependencies -->
             <plugin>
                 <groupId>org.liquibase</groupId>
@@ -248,6 +264,12 @@
                         <groupId>org.geolatte</groupId>
                         <artifactId>geolatte-geom</artifactId>
                         <version>${geolatte.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.n52.jackson</groupId>
+                        <artifactId>jackson-datatype-jts</artifactId>
+                        <version>1.2.6</version>
                     </dependency>
 
                     <!-- Ensure Hibernate core is present in plugin realm (aligned version) -->

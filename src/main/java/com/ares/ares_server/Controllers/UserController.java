@@ -28,6 +28,7 @@ public class UserController {
     private UserMapper userMapper;
 
     /**
+     * FIXME
      * Register( signup) a new user
      *
      * @param userDto The new user to create.
@@ -53,6 +54,7 @@ public class UserController {
     }
 
     /**
+     * FIXME
      * User login.
      *
      * @param userLogin The user login request containing email and password.
@@ -207,6 +209,7 @@ public class UserController {
     }
 
     /**
+     * TODO
      * Reset password (stub).
      */
     @Operation(
@@ -221,6 +224,7 @@ public class UserController {
     }
 
     /**
+     * FIXME
      * Change password (stub).
      */
     @Operation(
