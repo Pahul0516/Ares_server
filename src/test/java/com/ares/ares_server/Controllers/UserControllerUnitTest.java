@@ -18,10 +18,6 @@ import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
-/**
- * Unit tests for UserController using Mockito and standalone MockMvc.
- * Uses UUID-based IDs.
- */
 class UserControllerUnitTest {
 
     private MockMvc mockMvc;
