@@ -7,5 +7,5 @@ import java.util.List;
 import java.util.UUID;
 
 public interface RunRepository extends JpaRepository<Run, Long>{
-    List<Run> findByOwnerId(UUID owner_id);
+    List<Run> findByOwnerId(UUID ownerId);
 }
