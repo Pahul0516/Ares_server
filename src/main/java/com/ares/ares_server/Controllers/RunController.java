@@ -1,0 +1,175 @@
+package com.ares.ares_server.Controllers;
+
+import com.ares.ares_server.DTOs.RunDTO;
+import com.ares.ares_server.Domain.Run;
+import com.ares.ares_server.DTOs.Mappers.RunMapper;
+import com.ares.ares_server.Repository.RunRepository;
+import io.swagger.v3.oas.annotations.Operation;
+import io.swagger.v3.oas.annotations.responses.ApiResponse;
+import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.ResponseEntity;
+import org.springframework.web.bind.annotation.*;
+
+import java.util.List;
+import java.util.Optional;
+import java.util.UUID;
+import java.util.stream.Collectors;
+
+@RestController
+@RequestMapping("/api/runs")
+public class RunController {
+
+    @Autowired
+    private RunRepository runRepository;
+
+    @Autowired
+    private RunMapper runMapper;
+
+    /**
+     * Create a new run in the system.
+     *
+     * @param runDto The run object to be created.
+     * @return ResponseEntity containing the created run with HTTP status 201 (Created).
+     */
+    @Operation(
+            summary = "Create a new Run",
+            description = "Create a new run in the system. This will save a new run in the database.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "201", description = "Run created successfully"),
+            @ApiResponse(responseCode = "400", description = "Invalid input data provided")
+    })
+    @PostMapping
+    public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
+        Run run = runMapper.fromDto(runDto);
+        Run savedRun = runRepository.save(run);
+        return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
+    }
+
+    /**
+     * Get all runs from the system.
+     *
+     * @return ResponseEntity containing the list of all runs.
+     */
+    @Operation(
+            summary = "Retrieve all Runs",
+            description = "Fetch all runs present in the system.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Runs retrieved successfully"),
+            @ApiResponse(responseCode = "500", description = "Internal server error")
+    })
+    @GetMapping
+    public ResponseEntity<List<RunDTO>> getAllRuns() {
+        List<Run> runs = runRepository.findAll();
+        List<RunDTO> runDtos = runs.stream()
+                .map(runMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(runDtos, HttpStatus.OK);
+    }
+
+    /**
+     * Get a run by its unique ID.
+     *
+     * @param id The ID of the run to retrieve.
+     * @return ResponseEntity containing the run if found, otherwise 404 Not Found.
+     */
+    @Operation(
+            summary = "Get Run by ID",
+            description = "Retrieve a run using its unique identifier (ID).",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Run found successfully"),
+            @ApiResponse(responseCode = "404", description = "Run not found")
+    })
+    @GetMapping("/{id}")
+    public ResponseEntity<RunDTO> getRunById(@PathVariable Long id) {
+        Optional<Run> run = runRepository.findById(id);
+        if (run.isPresent()) {
+            return new ResponseEntity<>(runMapper.toDto(run.get()), HttpStatus.OK);
+        } else {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+    }
+
+    /**
+     * Get runs by a specific owner.
+     *
+     * @param ownerId The owner ID to filter runs.
+     * @return List of runs belonging to the specific owner.
+     */
+    @Operation(
+            summary = "Get Runs by Owner",
+            description = "Retrieve all runs owned by a specific owner.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Runs found successfully for the owner"),
+            @ApiResponse(responseCode = "404", description = "Owner not found")
+    })
+    @GetMapping("/owner/{ownerId}")
+    public ResponseEntity<List<RunDTO>> getRunsByOwner(@PathVariable UUID ownerId) {
+        List<Run> runs = runRepository.findByOwnerId(ownerId);
+        List<RunDTO> runDtos = runs.stream()
+                .map(runMapper::toDto)
+                .collect(Collectors.toList());
+        return new ResponseEntity<>(runDtos, HttpStatus.OK);
+    }
+
+    /**
+     * Update an existing run by ID.
+     *
+     * @param id The ID of the run to be updated.
+     * @param updatedRunDto The new run data for update.
+     * @return ResponseEntity containing the updated run, or 404 if run not found.
+     */
+    @Operation(
+            summary = "Update Run",
+            description = "Update an existing run by its unique ID.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Run updated successfully"),
+            @ApiResponse(responseCode = "404", description = "Run not found for the given ID"),
+            @ApiResponse(responseCode = "400", description = "Invalid run data provided")
+    })
+    @PutMapping("/{id}")
+    public ResponseEntity<RunDTO> updateRun(@PathVariable Long id, @RequestBody RunDTO updatedRunDto) {
+        if (!runRepository.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        Run runToUpdate = runMapper.fromDto(updatedRunDto);
+        runToUpdate.setId(id);
+        Run savedRun = runRepository.save(runToUpdate);
+        return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.OK);
+    }
+
+    /**
+     * Delete a run by its ID.
+     *
+     * @param id The ID of the run to be deleted.
+     * @return ResponseEntity with 204 status code for successful deletion.
+     */
+    @Operation(
+            summary = "Delete Run",
+            description = "Delete a run from the system by its unique ID.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "204", description = "Run deleted successfully"),
+            @ApiResponse(responseCode = "404", description = "Run not found for the given ID")
+    })
+    @DeleteMapping("/{id}")
+    public ResponseEntity<Void> deleteRun(@PathVariable Long id) {
+        if (!runRepository.existsById(id)) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+        runRepository.deleteById(id);
+        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+}

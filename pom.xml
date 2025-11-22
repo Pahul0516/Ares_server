@@ -37,6 +37,12 @@
             <artifactId>spring-boot-starter-web</artifactId>
         </dependency>
 
+        <!-- Spring Boot Starter Data JPA (for using JpaRepository) -->
+        <dependency>
+            <groupId>org.springframework.boot</groupId>
+            <artifactId>spring-boot-starter-data-jpa</artifactId>
+        </dependency>
+
         <dependency>
             <groupId>org.springframework</groupId>
             <artifactId>spring-orm</artifactId>
@@ -104,7 +110,7 @@
             <version>2.8.12</version>
         </dependency>
 
-        <!-- Lombok (provided) -->
+        <!-- Lombok (provided at runtime, but annotation processing will be configured) -->
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
@@ -118,6 +124,55 @@
             <artifactId>spring-boot-starter-test</artifactId>
             <scope>test</scope>
         </dependency>
+
+        <dependency>
+            <groupId>org.mockito</groupId>
+            <artifactId>mockito-core</artifactId>
+            <scope>test</scope>
+        </dependency>
+
+        <!-- Use Geolatte at runtime so Hibernate Spatial's default provider classes are available -->
+        <dependency>
+            <groupId>org.geolatte</groupId>
+            <artifactId>geolatte-geom</artifactId>
+            <version>${geolatte.version}</version>
+        </dependency>
+
+        <!-- USe for serialize geometrical data -->
+        <dependency>
+            <groupId>org.n52.jackson</groupId>
+            <artifactId>jackson-datatype-jts</artifactId>
+            <version>2.0.0</version>
+        </dependency>
+
+        <!-- MapStruct -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct</artifactId>
+            <version>1.5.5.Final</version>
+        </dependency>
+
+        <!-- MapStruct processor (kept as provided, compiler plugin will reference it) -->
+        <dependency>
+            <groupId>org.mapstruct</groupId>
+            <artifactId>mapstruct-processor</artifactId>
+            <version>1.5.5.Final</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <!-- Optional: Lombok + MapStruct binding (recommended) -->
+        <dependency>
+            <groupId>org.projectlombok</groupId>
+            <artifactId>lombok-mapstruct-binding</artifactId>
+            <version>0.2.0</version>
+            <scope>provided</scope>
+        </dependency>
+
+        <dependency>
+            <groupId>org.locationtech.jts.io</groupId>
+            <artifactId>jts-io-common</artifactId>
+            <version>1.19.0</version>
+        </dependency>
     </dependencies>
 
     <build>
@@ -126,6 +181,37 @@
             <plugin>
                 <groupId>org.springframework.boot</groupId>
                 <artifactId>spring-boot-maven-plugin</artifactId>
+            </plugin>
+
+            <!-- Consolidated maven-compiler-plugin configuration: include Lombok and MapStruct processors so annotation processing sees Lombok-generated methods -->
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.11.0</version>
+                <configuration>
+                    <release>${java.version}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.mapstruct</groupId>
+                            <artifactId>mapstruct-processor</artifactId>
+                            <version>1.5.5.Final</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>1.18.42</version>
+                        </path>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok-mapstruct-binding</artifactId>
+                            <version>0.2.0</version>
+                        </path>
+                    </annotationProcessorPaths>
+                    <!-- Let MapStruct know to generate Spring components (optional - already set on @Mapper) -->
+                    <compilerArgs>
+                        <arg>-Amapstruct.defaultComponentModel=spring</arg>
+                    </compilerArgs>
+                </configuration>
             </plugin>
 
             <!-- JaCoCo -->
@@ -153,6 +239,16 @@
                 <version>3.9.1.2184</version>
             </plugin>
 
+            <plugin>
+                <artifactId>maven-surefire-plugin</artifactId>
+                <version>3.1.2</version>
+                <configuration>
+                    <includes>
+                        <include>**/*Test.java</include>
+                    </includes>
+                </configuration>
+            </plugin>
+
             <!-- Liquibase Maven plugin with additional plugin-dependencies -->
             <plugin>
                 <groupId>org.liquibase</groupId>
@@ -168,6 +264,12 @@
                         <groupId>org.geolatte</groupId>
                         <artifactId>geolatte-geom</artifactId>
                         <version>${geolatte.version}</version>
+                    </dependency>
+
+                    <dependency>
+                        <groupId>org.n52.jackson</groupId>
+                        <artifactId>jackson-datatype-jts</artifactId>
+                        <version>1.2.6</version>
                     </dependency>
 
                     <!-- Ensure Hibernate core is present in plugin realm (aligned version) -->
@@ -191,15 +293,11 @@
                 </dependencies>
 
                 <configuration>
-                    <url>jdbc:postgresql://aws-1-eu-west-1.pooler.supabase.com:6543/postgres</url>
-                    <username>postgres.qqigierkjpakicqyhhoy</username>
-                    <password>o&amp;Nri%qQH9SV364KB1^SEA6lQimvW&amp;EFu@U</password>
-                    <driver>org.postgresql.Driver</driver>
-                    <changeLogFile>src/main/resources/db/db.changelog-master.xml</changeLogFile>
-                    <referenceUrl>hibernate:spring:com.ares.ares_server.Domain?dialect=org.hibernate.dialect.PostgreSQLDialect</referenceUrl>
-                    <diffChangeLogFile>src/main/resources/db/changelog/db.changelog-diff.xml</diffChangeLogFile>
+                    <!-- The properties file will supply DB, referenceUrl, etc. -->
+                    <propertyFile>src/main/resources/liquibase.properties</propertyFile>
                 </configuration>
             </plugin>
+
         </plugins>
     </build>
 </project>

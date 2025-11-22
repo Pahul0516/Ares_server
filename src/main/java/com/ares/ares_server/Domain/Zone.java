@@ -8,7 +8,6 @@ import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Polygon;
 
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -42,5 +41,4 @@ public class Zone {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false,foreignKey = @ForeignKey(name = "zones_owner_fkey"))
     private User owner;
-
 }

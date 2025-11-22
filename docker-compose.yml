@@ -1,0 +1,9 @@
+version: '3.8'
+
+services:
+  ares-server:
+    build: .
+    container_name: ares-server
+    ports:
+      - "9001:9001"
+    restart: unless-stopped

@@ -7,10 +7,8 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Polygon;
 
-
 import java.time.Instant;
 import java.time.OffsetDateTime;
-import java.util.UUID;
 
 @Getter
 @Setter
@@ -28,7 +26,7 @@ public class Run {
     @Column(name = "created_at", nullable = false)
     private OffsetDateTime createdAt;
 
-    @ManyToOne(fetch = FetchType.LAZY)
+    @ManyToOne(fetch = FetchType.EAGER)
     @JoinColumn(name = "owner", referencedColumnName = "id", nullable = false, foreignKey = @ForeignKey(name = "run_owner_fkey"))
     private User owner;
 
@@ -43,7 +41,4 @@ public class Run {
 
     @Column(name = "duration")
     private Instant duration;
-
-
-
 }
