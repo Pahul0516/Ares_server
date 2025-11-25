@@ -4,6 +4,7 @@ import com.ares.ares_server.dto.RunDTO;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.dto.mappers.RunMapper;
 import com.ares.ares_server.repository.RunRepository;
+import com.ares.ares_server.service.ZoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
@@ -26,6 +27,9 @@ public class RunController {
     @Autowired
     private RunMapper runMapper;
 
+    @Autowired
+    private ZoneService zoneService;
+
     /**
      * Create a new run in the system.
      *
@@ -45,6 +49,9 @@ public class RunController {
     public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
         Run run = runMapper.fromDto(runDto);
         Run savedRun = runRepository.save(run);
+
+        zoneService.updateZonesForRun(savedRun);
+
         return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
     }
 
@@ -172,3 +179,5 @@ public class RunController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
+
+
