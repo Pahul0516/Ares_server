@@ -5,9 +5,11 @@ import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.dto.mappers.RunMapper;
 import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.service.ZoneService;
+import com.ares.ares_server.utils.GeometryProjectionUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -32,6 +34,7 @@ public class RunController {
 
     /**
      * Create a new run in the system.
+     * Also updates adjacent zones to include/exclude the polygon depending on the owner
      *
      * @param runDto The run object to be created.
      * @return ResponseEntity containing the created run with HTTP status 201 (Created).
@@ -48,9 +51,42 @@ public class RunController {
     @PostMapping
     public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
         Run run = runMapper.fromDto(runDto);
-        Run savedRun = runRepository.save(run);
 
+        Geometry geom = run.getPolygon();
+
+        if (geom instanceof Polygon polygon) {
+            Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
+            Coordinate first = coords[0];
+            Coordinate last = coords[coords.length - 1];
+
+            Point p1 = geom.getFactory().createPoint(first);
+            Point p2 = geom.getFactory().createPoint(last);
+
+            Geometry buffer = GeometryProjectionUtil.bufferInMeters(p1, 5.0);
+
+            if (!buffer.contains(p2)) {
+                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+            } else if (!first.equals2D(last)) {
+                // snap last coordinate to first to close the polygon
+                coords[coords.length - 1] = first;
+                LinearRing shell = geom.getFactory().createLinearRing(coords);
+                Polygon polygon1 = geom.getFactory().createPolygon(shell, null);
+                run.setPolygon(polygon1);
+            }
+        }
+
+        Geometry projected = GeometryProjectionUtil.bufferInMeters(run.getPolygon(), 0);
+
+        double perimeterMeters = 0.0;
+        if (projected instanceof Polygon poly) {
+            perimeterMeters = poly.getExteriorRing().getLength();
+        }
+
+        run.setDistance((float) perimeterMeters);
+
+        Run savedRun = runRepository.save(run);
         zoneService.updateZonesForRun(savedRun);
+        savedRun = runRepository.save(savedRun); // update with areaGained set
 
         return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
     }

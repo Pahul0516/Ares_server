@@ -173,6 +173,13 @@
             <artifactId>jts-io-common</artifactId>
             <version>1.19.0</version>
         </dependency>
+
+        <dependency>
+            <groupId>org.locationtech.proj4j</groupId>
+            <artifactId>proj4j</artifactId>
+            <version>1.1.0</version>
+        </dependency>
+
     </dependencies>
 
     <build>

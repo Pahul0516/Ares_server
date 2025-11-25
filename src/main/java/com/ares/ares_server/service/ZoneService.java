@@ -4,6 +4,7 @@ import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
 import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.repository.ZoneRepository;
+import com.ares.ares_server.utils.GeometryProjectionUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.*;
 import org.springframework.stereotype.Service;
@@ -22,9 +23,10 @@ public class ZoneService {
     public void updateZonesForRun(Run run) {
         Geometry runGeom = run.getPolygon();
 
-        List<Zone> touchingZones = zoneRepository.findZonesIntersecting(runGeom);
+        Geometry searchGeom = GeometryProjectionUtil.bufferInMeters(runGeom, 5);
 
-        // Split zones into friendly and foreign
+        List<Zone> touchingZones = zoneRepository.findZonesIntersecting(searchGeom);
+
         var myZones = touchingZones.stream()
                 .filter(z -> z.getOwner().getId().equals(run.getOwner().getId()))
                 .toList();
@@ -33,13 +35,12 @@ public class ZoneService {
                 .filter(z -> !z.getOwner().getId().equals(run.getOwner().getId()))
                 .toList();
 
-        // 1. Subtract from other users
         for (Zone z : otherZones) {
             subtractRunFromZone(z, runGeom);
         }
 
-        // 2. Merge into current user's zones
-        mergeZonesForUser(myZones, runGeom, run.getOwner());
+        mergeZonesForUser(myZones, runGeom, run.getOwner(), run);
+
     }
 
     private void subtractRunFromZone(Zone zone, Geometry runGeom) {
@@ -52,7 +53,7 @@ public class ZoneService {
 
         if (result instanceof Polygon polygon) {
             zone.setPolygon(polygon);
-            zone.setArea(polygon.getArea());
+            zone.setLastUpdated(OffsetDateTime.now());
             zoneRepository.save(zone);
             return;
         }
@@ -66,31 +67,39 @@ public class ZoneService {
                 Zone newZone = new Zone();
                 newZone.setOwner(zone.getOwner());
                 newZone.setPolygon(piece);
-                newZone.setArea(piece.getArea());
                 newZone.setCreatedAt(OffsetDateTime.now());
+                newZone.setLastUpdated(OffsetDateTime.now());
 
                 zoneRepository.save(newZone);
             }
         }
     }
 
-    private void mergeZonesForUser(List<Zone> myZones, Geometry runGeom, User owner) {
-        Geometry merged = runGeom;
+    private void mergeZonesForUser(List<Zone> myZones, Geometry runGeom, User owner, Run run) {
 
+        double oldArea = myZones.stream()
+                .mapToDouble(z -> z.getPolygon().getArea())
+                .sum();
+
+        Geometry merged = runGeom;
         for (Zone z : myZones) {
             merged = merged.union(z.getPolygon());
         }
 
-        for (Zone z : myZones) {
-            zoneRepository.delete(z);
-        }
+        double newArea = merged.getArea();
+
+        double gained = Math.max(0, newArea - oldArea);
+        run.setAreaGained((float) gained);
+
+        zoneRepository.deleteAll(myZones);
 
         Zone finalZone = new Zone();
         finalZone.setOwner(owner);
         finalZone.setPolygon((Polygon) merged);
-        finalZone.setArea(merged.getArea());
         finalZone.setCreatedAt(OffsetDateTime.now());
+        finalZone.setLastUpdated(OffsetDateTime.now());
 
         zoneRepository.save(finalZone);
     }
+
 }
