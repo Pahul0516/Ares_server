@@ -121,6 +121,30 @@ public class RunController {
     }
 
     /**
+     * Get runs by a specific owner username.
+     *
+     * @param username The owner username to filter runs.
+     * @return List of runs belonging to the specific owner.
+     */
+    @Operation(
+            summary = "Get Runs by Owner",
+            description = "Retrieve all runs owned by a specific owner.",
+            tags = { "Run Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "Runs found successfully for the owner"),
+            @ApiResponse(responseCode = "404", description = "Owner not found")
+    })
+    @GetMapping("/username/{username}")
+    public ResponseEntity<List<RunDTO>> getRunsByOwner(@PathVariable String username) {
+        List<Run> runs = runRepository.findByOwnerUsername(username);
+        List<RunDTO> runDtos = runs.stream()
+                .map(runMapper::toDto)
+                .toList();
+        return new ResponseEntity<>(runDtos, HttpStatus.OK);
+    }
+
+    /**
      * Update an existing run by ID.
      *
      * @param id The ID of the run to be updated.
