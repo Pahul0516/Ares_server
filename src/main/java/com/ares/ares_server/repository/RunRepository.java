@@ -8,4 +8,5 @@ import java.util.UUID;
 
 public interface RunRepository extends JpaRepository<Run, Long>{
     List<Run> findByOwnerId(UUID ownerId);
+    List<Run> findByOwnerUsername(String username);
 }
