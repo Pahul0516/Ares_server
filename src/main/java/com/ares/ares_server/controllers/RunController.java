@@ -51,42 +51,33 @@ public class RunController {
     @PostMapping
     public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
         Run run = runMapper.fromDto(runDto);
-
         Geometry geom = run.getPolygon();
 
-        if (geom instanceof Polygon polygon) {
-            Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
-            Coordinate first = coords[0];
-            Coordinate last = coords[coords.length - 1];
-
-            Point p1 = geom.getFactory().createPoint(first);
-            Point p2 = geom.getFactory().createPoint(last);
-
-            Geometry buffer = GeometryProjectionUtil.bufferInMeters(p1, 5.0);
-
-            if (!buffer.contains(p2)) {
-                return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
-            } else if (!first.equals2D(last)) {
-                // snap last coordinate to first to close the polygon
-                coords[coords.length - 1] = first;
-                LinearRing shell = geom.getFactory().createLinearRing(coords);
-                Polygon polygon1 = geom.getFactory().createPolygon(shell, null);
-                run.setPolygon(polygon1);
-            }
+        Polygon polygon = null;
+        if (geom instanceof Polygon p) {
+            polygon = p;
         }
 
-        Geometry projected = GeometryProjectionUtil.bufferInMeters(run.getPolygon(), 0);
+        Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
+        Coordinate first = coords[0];
+        Coordinate last = coords[coords.length - 1];
 
-        double perimeterMeters = 0.0;
-        if (projected instanceof Polygon poly) {
-            perimeterMeters = poly.getExteriorRing().getLength();
+        Point p1 = geom.getFactory().createPoint(first);
+        Point p2 = geom.getFactory().createPoint(last);
+        Geometry buffer = GeometryProjectionUtil.bufferInMeters(p1, 10);
+
+        if (!buffer.contains(p2)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (!first.equals2D(last)) {
+            coords[coords.length - 1] = first;
+            LinearRing shell = geom.getFactory().createLinearRing(coords);
+            Polygon closedPolygon = geom.getFactory().createPolygon(shell, null);
+            run.setPolygon(closedPolygon);
         }
-
-        run.setDistance((float) perimeterMeters);
 
         Run savedRun = runRepository.save(run);
         zoneService.updateZonesForRun(savedRun);
-        savedRun = runRepository.save(savedRun); // update with areaGained set
+        savedRun = runRepository.save(savedRun); // update with areaGained
 
         return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
     }
