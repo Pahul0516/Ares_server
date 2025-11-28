@@ -19,7 +19,7 @@ player_context = {
     "current_conditions": {
         "time": "13:00",
         "weather": "Sunny",
-        "location_type": "Park"  # Dense area
+        "location_type": "City center"  # Dense area
     }
 }
 
