@@ -35,7 +35,7 @@ public class Zone {
     private Polygon polygon;
 
     @ColumnDefault("st_area(st_transform(polygon, 3857))")
-    @Column(name = "area")
+    @Column(name = "area", insertable = false, updatable = false)
     private Double area;
 
     @ManyToOne(fetch = FetchType.LAZY)

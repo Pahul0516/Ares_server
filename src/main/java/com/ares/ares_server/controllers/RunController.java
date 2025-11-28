@@ -4,9 +4,12 @@ import com.ares.ares_server.dto.RunDTO;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.dto.mappers.RunMapper;
 import com.ares.ares_server.repository.RunRepository;
+import com.ares.ares_server.service.ZoneService;
+import com.ares.ares_server.utils.GeometryProjectionUtil;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import org.locationtech.jts.geom.*;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -26,8 +29,12 @@ public class RunController {
     @Autowired
     private RunMapper runMapper;
 
+    @Autowired
+    private ZoneService zoneService;
+
     /**
      * Create a new run in the system.
+     * Also updates adjacent zones to include/exclude the polygon depending on the owner
      *
      * @param runDto The run object to be created.
      * @return ResponseEntity containing the created run with HTTP status 201 (Created).
@@ -44,7 +51,34 @@ public class RunController {
     @PostMapping
     public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
         Run run = runMapper.fromDto(runDto);
+        Geometry geom = run.getPolygon();
+
+        Polygon polygon = null;
+        if (geom instanceof Polygon p) {
+            polygon = p;
+        }
+
+        Coordinate[] coords = polygon.getExteriorRing().getCoordinates();
+        Coordinate first = coords[0];
+        Coordinate last = coords[coords.length - 1];
+
+        Point p1 = geom.getFactory().createPoint(first);
+        Point p2 = geom.getFactory().createPoint(last);
+        Geometry buffer = GeometryProjectionUtil.bufferInMeters(p1, 10);
+
+        if (!buffer.contains(p2)) {
+            return new ResponseEntity<>(HttpStatus.BAD_REQUEST);
+        } else if (!first.equals2D(last)) {
+            coords[coords.length - 1] = first;
+            LinearRing shell = geom.getFactory().createLinearRing(coords);
+            Polygon closedPolygon = geom.getFactory().createPolygon(shell, null);
+            run.setPolygon(closedPolygon);
+        }
+
         Run savedRun = runRepository.save(run);
+        zoneService.updateZonesForRun(savedRun);
+        savedRun = runRepository.save(savedRun); // update with areaGained
+
         return new ResponseEntity<>(runMapper.toDto(savedRun), HttpStatus.CREATED);
     }
 
@@ -196,3 +230,5 @@ public class RunController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
+
+

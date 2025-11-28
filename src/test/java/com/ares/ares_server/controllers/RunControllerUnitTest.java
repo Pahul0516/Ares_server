@@ -6,9 +6,12 @@ import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
 import com.ares.ares_server.repository.RunRepository;
+import com.ares.ares_server.service.ZoneService;
+import com.ares.ares_server.utils.GeometryProjectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
+import org.locationtech.jts.geom.*;
 import org.mockito.*;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
@@ -19,6 +22,8 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
+import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
+import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
@@ -36,16 +41,58 @@ class RunControllerUnitTest {
     @InjectMocks
     private RunController runController;
 
+    @Mock
+    private ZoneService zoneService;
+
+    @Mock
+    private GeometryProjectionUtil geometryProjectionUtil;
+
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
+    private final GeometryFactory geometryFactory = new GeometryFactory();
 
     private User owner;
     private UserDTO ownerDto;
+    private RunDTO inputDto;
+
+    private Polygon createClosedPolygon() {
+        Coordinate[] coords = {
+                new Coordinate(0, 0), new Coordinate(1, 0),
+                new Coordinate(1, 1), new Coordinate(0, 1),
+                new Coordinate(0, 0) // Closed
+        };
+        return geometryFactory.createPolygon(coords);
+    }
+
+    private Polygon createUnclosedPolygonForTesting() {
+        Coordinate[] coords = {
+                new Coordinate(0, 0), new Coordinate(1, 0),
+                new Coordinate(1, 1), new Coordinate(0, 1),
+        };
+        return geometryFactory.createPolygon(coords);
+    }
+
+    private Map<String, Object> polygonToGeoJson(Polygon polygon) {
+        Map<String, Object> geoJson = new HashMap<>();
+        geoJson.put("type", "Polygon");
+
+        List<List<List<Double>>> coordinates = new ArrayList<>();
+        List<List<Double>> ring = new ArrayList<>();
+
+        for (Coordinate c : polygon.getCoordinates()) {
+            ring.add(Arrays.asList(c.x, c.y));
+        }
+        coordinates.add(ring);
+
+        geoJson.put("coordinates", coordinates);
+        return geoJson;
+    }
 
     @BeforeEach
     void setUp() {
         MockitoAnnotations.openMocks(this);
         ReflectionTestUtils.setField(runController, "runRepository", runRepository);
         ReflectionTestUtils.setField(runController, "runMapper", runMapper);
+        ReflectionTestUtils.setField(runController, "zoneService", zoneService);
         mockMvc = MockMvcBuilders.standaloneSetup(runController).build();
 
         owner = new User();
@@ -54,37 +101,57 @@ class RunControllerUnitTest {
         owner.setEmail("test@example.com");
 
         ownerDto = new UserDTO(owner.getId(), owner.getUsername(), owner.getEmail(), null);
+        inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null, Instant.ofEpochSecond(1800));
     }
 
     @Test
-    void createRun_success() throws Exception {
-        RunDTO inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null, Instant.ofEpochSecond(1800));
+    void createRun_success_closedPolygon() throws Exception {
+        Polygon runPolygon = createClosedPolygon();
+        inputDto = new RunDTO(
+                null,
+                OffsetDateTime.now(),
+                ownerDto,
+                5f,
+                10f,
+                polygonToGeoJson(runPolygon),
+                Instant.ofEpochSecond(1800)
+        );
 
-        Run saved = new Run();
-        saved.setId(1L);
-        saved.setOwner(owner);
-        saved.setDistance(inputDto.getDistance());
-        saved.setAreaGained(inputDto.getAreaGained());
-        saved.setCreatedAt(inputDto.getCreatedAt());
-        saved.setDuration(inputDto.getDuration());
+        Run runEntity = new Run();
+        runEntity.setOwner(owner);
+        runEntity.setPolygon(runPolygon);
 
-        RunDTO resultDto = new RunDTO(1L, inputDto.getCreatedAt(), ownerDto, 5f, 10f, null, inputDto.getDuration());
+        Run savedRun = new Run();
+        savedRun.setId(1L);
+        savedRun.setOwner(owner);
+        savedRun.setPolygon(runPolygon);
+        savedRun.setAreaGained(15f);
 
-        when(runMapper.fromDto(any(RunDTO.class))).thenReturn(saved);
-        when(runRepository.save(any(Run.class))).thenReturn(saved);
-        when(runMapper.toDto(any(Run.class))).thenReturn(resultDto);
+        RunDTO resultDto = new RunDTO(1L, inputDto.getCreatedAt(), ownerDto, 5f, 15f, polygonToGeoJson(runPolygon), inputDto.getDuration());
 
-        mockMvc.perform(post("/api/runs")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(objectMapper.writeValueAsString(inputDto)))
-                .andExpect(status().isCreated())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.distance").value(5.0))
-                .andExpect(jsonPath("$.areaGained").value(10.0));
+        try (MockedStatic<GeometryProjectionUtil> mockedUtil = mockStatic(GeometryProjectionUtil.class)) {
+            mockedUtil.when(() -> GeometryProjectionUtil.bufferInMeters(any(Geometry.class), anyDouble()))
+                    .thenAnswer(invocation -> {
+                        Geometry geom = invocation.getArgument(0);
+                        return geom.buffer(10); // simple valid buffer
+                    });
 
-        verify(runMapper).fromDto(any(RunDTO.class));
-        verify(runRepository).save(any(Run.class));
-        verify(runMapper).toDto(any(Run.class));
+            when(runMapper.fromDto(any(RunDTO.class))).thenReturn(runEntity);
+            when(runRepository.save(any(Run.class))).thenReturn(savedRun);
+            when(runMapper.toDto(savedRun)).thenReturn(resultDto);
+
+            mockMvc.perform(post("/api/runs")
+                            .contentType(MediaType.APPLICATION_JSON)
+                            .content(objectMapper.writeValueAsString(inputDto)))
+                    .andExpect(status().isCreated())
+                    .andExpect(jsonPath("$.id").value(1))
+                    .andExpect(jsonPath("$.areaGained").value(15.0));
+
+            verify(runMapper).fromDto(any(RunDTO.class));
+            verify(zoneService).updateZonesForRun(any(Run.class));
+            verify(runRepository, times(2)).save(any(Run.class));
+            verify(runMapper).toDto(savedRun);
+        }
     }
 
     @Test
@@ -162,27 +229,30 @@ class RunControllerUnitTest {
 
     @Test
     void updateRun_success() throws Exception {
-        RunDTO updatedDto = new RunDTO(null, null, null, 10f, null, null, null);
-        Run entity = new Run(); entity.setOwner(owner); entity.setDistance(updatedDto.getDistance());
+        Long runId = 1L;
+        Float newDistance = 10f;
+        RunDTO updatedDto = new RunDTO(null, null, null, newDistance, null, null, null);
 
-        Run savedEntity = new Run(); savedEntity.setId(1L); savedEntity.setDistance(10f);
-        RunDTO returnedDto = new RunDTO(1L, null, null, 10f, null, null, null);
+        Run entityToSave = new Run(); entityToSave.setOwner(owner); entityToSave.setDistance(updatedDto.getDistance());
 
-        when(runRepository.existsById(1L)).thenReturn(true);
-        when(runMapper.fromDto(updatedDto)).thenReturn(entity);
-        when(runRepository.save(entity)).thenReturn(savedEntity);
+        Run savedEntity = new Run(); savedEntity.setId(runId); savedEntity.setDistance(newDistance);
+        RunDTO returnedDto = new RunDTO(runId, null, null, newDistance, null, null, null);
+
+        when(runRepository.existsById(runId)).thenReturn(true);
+        when(runMapper.fromDto(updatedDto)).thenReturn(entityToSave);
+        when(runRepository.save(any(Run.class))).thenReturn(savedEntity);
         when(runMapper.toDto(savedEntity)).thenReturn(returnedDto);
 
-        mockMvc.perform(put("/api/runs/1")
+        mockMvc.perform(put("/api/runs/" + runId)
                         .contentType(MediaType.APPLICATION_JSON)
                         .content(objectMapper.writeValueAsString(updatedDto)))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.distance").value(10.0));
+                .andExpect(jsonPath("$.id").value(runId))
+                .andExpect(jsonPath("$.distance").value(newDistance));
 
-        verify(runRepository).existsById(1L);
+        verify(runRepository).existsById(runId);
         verify(runMapper).fromDto(updatedDto);
-        verify(runRepository).save(entity);
+        verify(runRepository).save(any(Run.class));
         verify(runMapper).toDto(savedEntity);
     }
 
