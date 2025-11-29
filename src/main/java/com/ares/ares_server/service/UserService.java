@@ -1,0 +1,57 @@
+package com.ares.ares_server.service;
+
+import com.ares.ares_server.domain.User;
+import com.ares.ares_server.dto.UserDTO;
+import com.ares.ares_server.dto.mappers.UserMapper;
+import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.repository.UserRepository;
+import lombok.RequiredArgsConstructor;
+import org.springframework.stereotype.Service;
+import org.springframework.transaction.annotation.Transactional;
+
+import java.util.List;
+
+@Service
+@RequiredArgsConstructor
+public class UserService {
+
+    private final UserMapper userMapper;
+    private final UserRepository userRepository;
+
+    @Transactional
+    public void deleteUser(String email) {
+        if (!userRepository.existsByEmail(email)) {
+            throw new UserDoesNotExistsException("User with email " + email + " does not exist!");
+        }
+        userRepository.deleteByEmail(email);
+    }
+
+    public UserDTO updateUser(String email, UserDTO updatedUserDto) {
+        User user = userRepository.findByEmail(email)
+                .orElseThrow(() -> new UserDoesNotExistsException(
+                        "User with email " + email + " does not exist!"
+                ));
+
+        user.setEmail(updatedUserDto.getEmail());
+        user.setUsername(updatedUserDto.getUsername());
+        user.setEncryptedPassword(updatedUserDto.getEncryptedPassword());
+        User savedUser = userRepository.save(user);
+        return userMapper.toDto(savedUser);
+    }
+
+    public UserDTO getUserByEmail(String email) {
+        return userMapper.toDto(
+                userRepository.findByEmail(email)
+                        .orElseThrow(() -> new UserDoesNotExistsException(
+                                "User with email " + email + " does not exist"
+                        ))
+        );
+    }
+
+    public List<UserDTO> getAllUsers() {
+        return userRepository.findAll()
+                .stream()
+                .map(userMapper::toDto)
+                .toList();
+    }
+}
