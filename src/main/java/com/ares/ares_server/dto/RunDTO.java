@@ -2,6 +2,7 @@ package com.ares.ares_server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
+import org.springframework.http.HttpStatus;
 
 import java.time.OffsetDateTime;
 import java.time.Instant;

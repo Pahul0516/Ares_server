@@ -11,8 +11,10 @@ import com.ares.ares_server.utils.GeometryProjectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.*;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,12 +24,11 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
 class RunControllerUnitTest {
 
     private MockMvc mockMvc;
@@ -43,9 +44,6 @@ class RunControllerUnitTest {
 
     @Mock
     private ZoneService zoneService;
-
-    @Mock
-    private GeometryProjectionUtil geometryProjectionUtil;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final GeometryFactory geometryFactory = new GeometryFactory();
@@ -89,7 +87,6 @@ class RunControllerUnitTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         ReflectionTestUtils.setField(runController, "runRepository", runRepository);
         ReflectionTestUtils.setField(runController, "runMapper", runMapper);
         ReflectionTestUtils.setField(runController, "zoneService", zoneService);
@@ -100,7 +97,7 @@ class RunControllerUnitTest {
         owner.setUsername("testuser");
         owner.setEmail("test@example.com");
 
-        ownerDto = new UserDTO(owner.getId(), owner.getUsername(), owner.getEmail(), null);
+        ownerDto = new UserDTO(owner.getUsername(), owner.getEmail(), null);
         inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null, Instant.ofEpochSecond(1800));
     }
 
@@ -187,8 +184,7 @@ class RunControllerUnitTest {
 
         mockMvc.perform(get("/api/runs/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.owner.id").value(owner.getId().toString()));
+                .andExpect(jsonPath("$.id").value(1));
 
         verify(runRepository).findById(1L);
         verify(runMapper).toDto(run);
@@ -218,9 +214,7 @@ class RunControllerUnitTest {
 
         mockMvc.perform(get("/api/runs/owner/" + owner.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].owner.id").value(owner.getId().toString()))
-                .andExpect(jsonPath("$[1].owner.id").value(owner.getId().toString()));
+                .andExpect(jsonPath("$.length()").value(2));
 
         verify(runRepository).findByOwnerId(owner.getId());
         verify(runMapper).toDto(r1);

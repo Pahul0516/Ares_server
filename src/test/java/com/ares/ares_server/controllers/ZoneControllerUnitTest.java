@@ -63,7 +63,7 @@ class ZoneControllerUnitTest {
         owner.setUsername("owner1");
         owner.setEmail("owner@example.com");
 
-        ownerDto = new UserDTO(owner.getId(), owner.getUsername(), owner.getEmail(), null);
+        ownerDto = new UserDTO(owner.getUsername(), owner.getEmail(), null);
 
     }
 
@@ -246,9 +246,7 @@ class ZoneControllerUnitTest {
                 .andExpect(status().isOk())
                 .andExpect(jsonPath("$.length()").value(2))
                 .andExpect(jsonPath("$[0].id").value(1L))
-                .andExpect(jsonPath("$[0].owner.id").value(owner.getId().toString()))
-                .andExpect(jsonPath("$[1].id").value(2L))
-                .andExpect(jsonPath("$[1].owner.id").value(owner.getId().toString()));
+                .andExpect(jsonPath("$[1].id").value(2L));
 
         verify(zoneRepository).findByOwnerId(owner.getId());
         verify(zoneMapper).toDto(zone1);
