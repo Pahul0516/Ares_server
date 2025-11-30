@@ -11,8 +11,10 @@ import com.ares.ares_server.utils.GeometryProjectionUtil;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;
 import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.extension.ExtendWith;
 import org.locationtech.jts.geom.*;
 import org.mockito.*;
+import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.http.MediaType;
 import org.springframework.test.web.servlet.MockMvc;
 import org.springframework.test.web.servlet.setup.MockMvcBuilders;
@@ -22,12 +24,11 @@ import java.time.Instant;
 import java.time.OffsetDateTime;
 import java.util.*;
 
-import static org.hibernate.validator.internal.util.Contracts.assertNotNull;
-import static org.junit.jupiter.api.Assertions.assertEquals;
 import static org.mockito.Mockito.*;
 import static org.springframework.test.web.servlet.request.MockMvcRequestBuilders.*;
 import static org.springframework.test.web.servlet.result.MockMvcResultMatchers.*;
 
+@ExtendWith(MockitoExtension.class)
 class RunControllerUnitTest {
 
     private MockMvc mockMvc;
@@ -43,9 +44,6 @@ class RunControllerUnitTest {
 
     @Mock
     private ZoneService zoneService;
-
-    @Mock
-    private GeometryProjectionUtil geometryProjectionUtil;
 
     private final ObjectMapper objectMapper = new ObjectMapper().registerModule(new JavaTimeModule());
     private final GeometryFactory geometryFactory = new GeometryFactory();
@@ -89,7 +87,6 @@ class RunControllerUnitTest {
 
     @BeforeEach
     void setUp() {
-        MockitoAnnotations.openMocks(this);
         ReflectionTestUtils.setField(runController, "runRepository", runRepository);
         ReflectionTestUtils.setField(runController, "runMapper", runMapper);
         ReflectionTestUtils.setField(runController, "zoneService", zoneService);

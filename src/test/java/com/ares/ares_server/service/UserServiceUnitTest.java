@@ -35,15 +35,13 @@ public class UserServiceUnitTest {
     @InjectMocks
     private UserService userService;
 
-    private final ObjectMapper objectMapper = new ObjectMapper();
-
     @AfterEach
     void tearDown() {
         clearInvocations(userRepository, userMapper);
     }
 
     @Test
-    void getAllUsers_returns_list() throws Exception {
+    void getAllUsers_returns_list() {
         User u1 = new User(); u1.setId(UUID.randomUUID()); u1.setUsername("a");
         User u2 = new User(); u2.setId(UUID.randomUUID()); u2.setUsername("b");
 
@@ -64,7 +62,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void getUserByEmail_found() throws Exception {
+    void getUserByEmail_found() {
         UUID id = UUID.randomUUID();
         String email = "test@test.com";
         User u = new User(); u.setId(id); u.setUsername("five"); u.setEmail(email);
@@ -82,7 +80,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void getUserByEmail_notFound() throws Exception {
+    void getUserByEmail_notFound() {
         String email = "wrong_email";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
@@ -94,7 +92,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void updateUser_success() throws Exception {
+    void updateUser_success() {
         UUID id = UUID.randomUUID();
         User existing = new User(); existing.setId(id); existing.setEmail("old@x.com"); existing.setUsername("old");
         UserDTO updatedDTO = new UserDTO( "new", "new@x.com", null);
@@ -114,7 +112,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void updateUser_notFound() throws Exception {
+    void updateUser_notFound() {
         String email = "worng_email";
         UserDTO updateDto = new UserDTO( "new", "new@x.com", null);
 
@@ -129,7 +127,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void deleteUser_success() throws Exception {
+    void deleteUser_success() {
         String email = "new@x.com";
         when(userRepository.existsByEmail(email)).thenReturn(true);
         doNothing().when(userRepository).deleteByEmail(email);
@@ -141,7 +139,7 @@ public class UserServiceUnitTest {
     }
 
     @Test
-    void deleteUser_notFound() throws Exception {
+    void deleteUser_notFound() {
         String email = "new@x.com";
         when(userRepository.existsByEmail(email)).thenReturn(false);
 

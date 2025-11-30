@@ -65,7 +65,6 @@ class UserControllerUnitTest {
 
     @Test
     void getUserByEmail_found() throws Exception {
-        UUID id = UUID.randomUUID();
         String email = "test@test.com";
         UserDTO userDTO = new UserDTO("five", email, null);
 
