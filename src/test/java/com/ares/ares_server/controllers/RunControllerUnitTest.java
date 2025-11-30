@@ -100,7 +100,7 @@ class RunControllerUnitTest {
         owner.setUsername("testuser");
         owner.setEmail("test@example.com");
 
-        ownerDto = new UserDTO(owner.getId(), owner.getUsername(), owner.getEmail(), null);
+        ownerDto = new UserDTO(owner.getUsername(), owner.getEmail(), null);
         inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null, Instant.ofEpochSecond(1800));
     }
 
@@ -187,8 +187,7 @@ class RunControllerUnitTest {
 
         mockMvc.perform(get("/api/runs/1"))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.id").value(1))
-                .andExpect(jsonPath("$.owner.id").value(owner.getId().toString()));
+                .andExpect(jsonPath("$.id").value(1));
 
         verify(runRepository).findById(1L);
         verify(runMapper).toDto(run);
@@ -218,9 +217,7 @@ class RunControllerUnitTest {
 
         mockMvc.perform(get("/api/runs/owner/" + owner.getId()))
                 .andExpect(status().isOk())
-                .andExpect(jsonPath("$.length()").value(2))
-                .andExpect(jsonPath("$[0].owner.id").value(owner.getId().toString()))
-                .andExpect(jsonPath("$[1].owner.id").value(owner.getId().toString()));
+                .andExpect(jsonPath("$.length()").value(2));
 
         verify(runRepository).findByOwnerId(owner.getId());
         verify(runMapper).toDto(r1);
