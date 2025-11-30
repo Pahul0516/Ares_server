@@ -5,7 +5,6 @@ import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
 import com.ares.ares_server.exceptios.UserDoesNotExistsException;
 import com.ares.ares_server.repository.UserRepository;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
