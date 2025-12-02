@@ -2,10 +2,8 @@ package com.ares.ares_server.dto;
 
 import io.swagger.v3.oas.annotations.media.Schema;
 import lombok.*;
-import org.springframework.http.HttpStatus;
 
 import java.time.OffsetDateTime;
-import java.time.Instant;
 import java.util.Map;
 
 @Data
@@ -20,5 +18,5 @@ public class RunDTO {
     private Float areaGained;
     @Schema(description = "GeoJSON polygon object", example = "{\"type\":\"Polygon\",\"coordinates\":[[[23.6,46.7],[23.7,46.8]]]}")
     private Map<String, Object> polygon;
-    private Instant duration;
+    private Integer duration;
 }

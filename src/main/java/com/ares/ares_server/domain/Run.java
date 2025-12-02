@@ -7,7 +7,6 @@ import lombok.Setter;
 import org.hibernate.annotations.ColumnDefault;
 import org.locationtech.jts.geom.Polygon;
 
-import java.time.Instant;
 import java.time.OffsetDateTime;
 
 @Getter
@@ -40,5 +39,5 @@ public class Run {
     private Polygon polygon;
 
     @Column(name = "duration")
-    private Instant duration;
+    private Integer duration;
 }

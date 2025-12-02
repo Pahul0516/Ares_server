@@ -15,6 +15,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import java.time.OffsetDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.UUID;
@@ -49,7 +50,7 @@ public class RunController {
             @ApiResponse(responseCode = "400", description = "Invalid input data provided")
     })
     @PostMapping
-    public ResponseEntity<RunDTO> createRun(@RequestBody RunDTO runDto) {
+    public ResponseEntity<?> createRun(@RequestBody RunDTO runDto) {
         Run run = runMapper.fromDto(runDto);
         Geometry geom = run.getPolygon();
 
@@ -75,6 +76,7 @@ public class RunController {
             run.setPolygon(closedPolygon);
         }
 
+        run.setCreatedAt(OffsetDateTime.now());
         Run savedRun = runRepository.save(run);
         zoneService.updateZonesForRun(savedRun);
         savedRun = runRepository.save(savedRun); // update with areaGained
@@ -230,5 +232,4 @@ public class RunController {
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }
-
 

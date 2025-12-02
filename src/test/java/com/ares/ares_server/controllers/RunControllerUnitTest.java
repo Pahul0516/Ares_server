@@ -97,8 +97,8 @@ class RunControllerUnitTest {
         owner.setUsername("testuser");
         owner.setEmail("test@example.com");
 
-        ownerDto = new UserDTO(owner.getUsername(), owner.getEmail(), null);
-        inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null, Instant.ofEpochSecond(1800));
+        ownerDto = new UserDTO(new UUID(1, 3), owner.getUsername(), owner.getEmail(), null);
+        inputDto = new RunDTO(null, OffsetDateTime.now(), ownerDto, 5f, 10f, null,OffsetDateTime.now().getSecond());
     }
 
     @Test
@@ -111,7 +111,7 @@ class RunControllerUnitTest {
                 5f,
                 10f,
                 polygonToGeoJson(runPolygon),
-                Instant.ofEpochSecond(1800)
+                OffsetDateTime.now().getSecond()
         );
 
         Run runEntity = new Run();

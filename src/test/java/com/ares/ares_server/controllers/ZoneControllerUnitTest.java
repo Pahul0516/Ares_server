@@ -63,7 +63,7 @@ class ZoneControllerUnitTest {
         owner.setUsername("owner1");
         owner.setEmail("owner@example.com");
 
-        ownerDto = new UserDTO(owner.getUsername(), owner.getEmail(), null);
+        ownerDto = new UserDTO(owner.getId(), owner.getUsername(), owner.getEmail(), null);
 
     }
 
