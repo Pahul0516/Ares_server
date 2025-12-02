@@ -19,7 +19,7 @@ import java.util.List;
 public class ZoneService {
 
     private final ZoneRepository zoneRepository;
-    private static final double AREA_EPSILON = 100;
+    private static final double AREA_EPSILON = 30;
 
     @Transactional
     public void updateZonesForRun(Run run) {
