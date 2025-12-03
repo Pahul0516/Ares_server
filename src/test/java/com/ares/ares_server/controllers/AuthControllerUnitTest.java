@@ -46,7 +46,7 @@ class AuthControllerUnitTest {
 
     @Test
     void signup_success() throws Exception {
-        UserDTO userDTO = new UserDTO("john", "john@test.com", "secret");
+        UserDTO userDTO = new UserDTO(null, "john", "john@test.com", "secret");
         AuthDTO authDTO = new AuthDTO("token123");
 
         when(authService.signUp(userDTO)).thenReturn(authDTO);
@@ -62,7 +62,7 @@ class AuthControllerUnitTest {
 
     @Test
     void signup_conflict_userAlreadyExists() throws Exception {
-        UserDTO userDTO = new UserDTO("john", "john@test.com", "secret");
+        UserDTO userDTO = new UserDTO(null, "john", "john@test.com", "secret");
 
         when(authService.signUp(userDTO))
                 .thenThrow(new UserAlreadyExistsException("User already exists"));

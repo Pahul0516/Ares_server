@@ -42,7 +42,7 @@ class AuthServiceUnitTest {
 
     @Test
     void signUp_success() {
-        UserDTO userDTO = new UserDTO("john", "john@test.com", "pass");
+        UserDTO userDTO = new UserDTO(null ,"john", "john@test.com", "pass");
         User user = new User();
         user.setEmail(userDTO.getEmail());
 
@@ -59,7 +59,7 @@ class AuthServiceUnitTest {
 
     @Test
     void signUp_conflict_userAlreadyExists() {
-        UserDTO userDTO = new UserDTO("john", "john@test.com", "pass");
+        UserDTO userDTO = new UserDTO(null, "john", "john@test.com", "pass");
 
         when(userRepository.existsByEmail(userDTO.getEmail())).thenReturn(true);
 

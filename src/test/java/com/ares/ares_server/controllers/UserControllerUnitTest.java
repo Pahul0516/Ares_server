@@ -44,8 +44,8 @@ class UserControllerUnitTest {
 
     @Test
     void getAllUsers_returns_list() throws Exception {
-        UserDTO userDto1 = new UserDTO("a", "a@test.com", "encryptedPassword1");
-        UserDTO userDto2 = new UserDTO("b", "b@test.com", "encryptedPassword2");
+        UserDTO userDto1 = new UserDTO(null, "a", "a@test.com", "encryptedPassword1");
+        UserDTO userDto2 = new UserDTO(null, "b", "b@test.com", "encryptedPassword2");
         List<UserDTO> userDTOList = Arrays.asList(userDto1, userDto2);
 
         when(userService.getAllUsers()).thenReturn(userDTOList);
@@ -66,7 +66,7 @@ class UserControllerUnitTest {
     @Test
     void getUserByEmail_found() throws Exception {
         String email = "test@test.com";
-        UserDTO userDTO = new UserDTO("five", email, null);
+        UserDTO userDTO = new UserDTO(null, "five", email, null);
 
         when(userService.getUserByEmail(email)).thenReturn(userDTO);
 
@@ -96,7 +96,7 @@ class UserControllerUnitTest {
     @Test
     void updateUser_success() throws Exception {
         String email = "old_email";
-        UserDTO updatedDTO = new UserDTO("new", "new@x.com", null);
+        UserDTO updatedDTO = new UserDTO(null, "new", "new@x.com", null);
 
         when(userService.updateUser(email, updatedDTO)).thenReturn(updatedDTO);
 
@@ -113,7 +113,7 @@ class UserControllerUnitTest {
     @Test
     void updateUser_notFound() throws Exception {
         String email = "wrong_email";
-        UserDTO updateDto = new UserDTO("new", "new@x.com", null);
+        UserDTO updateDto = new UserDTO(null, "new", "new@x.com", null);
         String expectedMessage = "User with email " + email + " does not exist";
 
         when(userService.updateUser(email, updateDto))
