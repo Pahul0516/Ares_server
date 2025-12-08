@@ -1,6 +1,7 @@
 package com.ares.ares_server.controllers;
 
 import com.ares.ares_server.dto.UserDTO;
+import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.service.UserService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
@@ -86,5 +87,29 @@ public class UserController {
     public ResponseEntity<Void> deleteUser(@PathVariable String email) {
        userService.deleteUser(email);
        return new ResponseEntity<>(HttpStatus.NO_CONTENT);
+    }
+
+    /**
+     * Retrieve stats for a user by Email.
+     */
+    @Operation(
+            summary = "Get User Stats by Email",
+            description = "Retrieve user stats using their unique Email.",
+            tags = { "User Operations" }
+    )
+    @ApiResponses(value = {
+            @ApiResponse(responseCode = "200", description = "User stats found"),
+            @ApiResponse(responseCode = "404", description = "User not found")
+    })
+    @GetMapping("/{email}/stats")
+    public ResponseEntity<UserStatsDTO> getUserStats(@PathVariable String email) {
+        UserDTO user =  userService.getUserByEmail(email);
+        if(user == null) {
+            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
+        }
+
+        UserStatsDTO userStatsDTO = userService.getUserStats(email);
+
+        return new ResponseEntity<>(userStatsDTO, HttpStatus.OK);
     }
 }

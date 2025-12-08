@@ -1,10 +1,15 @@
 package com.ares.ares_server.service;
 
+import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
+import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.UserDTO;
+import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
 import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.repository.UserRepository;
+import com.ares.ares_server.repository.ZoneRepository;
 import org.junit.jupiter.api.AfterEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -27,6 +32,12 @@ public class UserServiceUnitTest {
 
     @Mock
     private UserRepository userRepository;
+
+    @Mock
+    private RunRepository runRepository;
+
+    @Mock
+    private ZoneRepository zoneRepository;
 
     @Mock
     private UserMapper userMapper;
@@ -147,5 +158,50 @@ public class UserServiceUnitTest {
         });
 
         verify(userRepository).existsByEmail(email);
+    }
+
+    @Test
+    void getUserStats_success() {
+        UUID userId = UUID.randomUUID();
+        String email = "stats@test.com";
+
+        User user = new User();
+        user.setId(userId);
+        user.setEmail(email);
+
+        when(userRepository.findByEmail(email))
+                .thenReturn(Optional.of(user));
+
+        Run r1 = new Run();
+        r1.setDistance(100F);
+        r1.setDuration(60);
+
+        Run r2 = new Run();
+        r2.setDistance(200F);
+        r2.setDuration(120);
+
+        when(runRepository.findByOwnerId(userId))
+                .thenReturn(Arrays.asList(r1, r2));
+
+        Zone z1 = new Zone();
+        z1.setArea(10.5);
+
+        Zone z2 = new Zone();
+        z2.setArea(20.0);
+
+        when(zoneRepository.findByOwnerId(userId))
+                .thenReturn(Arrays.asList(z1, z2));
+
+        UserStatsDTO stats = userService.getUserStats(email);
+
+        assertNotNull(stats);
+
+        assertEquals(300, stats.getTotalDistance());   // 100 + 200
+        assertEquals(180, stats.getTimeRunning());     // 60 + 120
+        assertEquals(30.5f, stats.getTotalArea());     // 10.5 + 20.0
+
+        verify(userRepository).findByEmail(email);
+        verify(runRepository).findByOwnerId(userId);
+        verify(zoneRepository).findByOwnerId(userId);
     }
 }
