@@ -23,7 +23,7 @@ public class SecurityConfig {
                 .csrf(csrf -> csrf.disable())  // Disable CSRF for JWT
                 .authorizeHttpRequests(auth -> auth
                         // Public endpoints - anyone can access
-                        .requestMatchers("/api/auth/**", "/api/users/**").permitAll()
+                        .requestMatchers("/api/auth/**", "/api/users/**", "/api/health/check").permitAll()
                         // Swagger UI endpoints - allow public access
                         .requestMatchers(
                                 "/v3/api-docs/**",      // OpenAPI JSON
