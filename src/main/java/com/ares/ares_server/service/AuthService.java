@@ -99,4 +99,42 @@ public class AuthService {
         }
         return token;
     }
+
+    // Add these methods to your AuthService class
+
+    public String extractUsername(String token) {
+        try {
+            return Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getSubject(); // This returns the email we set in generateToken
+        } catch (JwtException | IllegalArgumentException e) {
+            return null;
+        }
+    }
+
+    public boolean isTokenValid(String token, String email) {
+        try {
+            String tokenEmail = extractUsername(token);
+            return tokenEmail != null && tokenEmail.equals(email) && !isTokenExpired(token);
+        } catch (Exception e) {
+            return false;
+        }
+    }
+
+    private boolean isTokenExpired(String token) {
+        try {
+            Date expiration = Jwts.parserBuilder()
+                    .setSigningKey(getSigningKey())
+                    .build()
+                    .parseClaimsJws(token)
+                    .getBody()
+                    .getExpiration();
+            return expiration.before(new Date());
+        } catch (JwtException | IllegalArgumentException e) {
+            return true;
+        }
+    }
 }
