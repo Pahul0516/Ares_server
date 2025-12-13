@@ -1,8 +1,6 @@
 package com.ares.ares_server.controllers;
 
-import com.ares.ares_server.exceptios.InvalidCredentialsException;
-import com.ares.ares_server.exceptios.UserAlreadyExistsException;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptios.*;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
@@ -23,6 +21,15 @@ public class GlobalExceptionHandler {
     @ExceptionHandler(InvalidCredentialsException.class)
     public ResponseEntity<?> handleInvalidCredentials(InvalidCredentialsException ex) {
         return ResponseEntity.status(401).body(ex.getMessage());
+    }
+    @ExceptionHandler(RunDoesNotExistException.class)
+    public ResponseEntity<?> handleRunDoesNotExists(RunDoesNotExistException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
+    }
+
+    @ExceptionHandler(ZoneDoesNotExistException.class)
+    public ResponseEntity<?> handleZoneDoesNotExistException(ZoneDoesNotExistException ex) {
+        return ResponseEntity.status(404).body(ex.getMessage());
     }
 
 }
