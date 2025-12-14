@@ -94,8 +94,13 @@ public class RunService {
      * Retrieve runs by owner ID.
      */
     public List<RunDTO> getRunsByOwner(UUID ownerId) {
-        return runRepository.findByOwnerId(ownerId)
-                .stream()
+        List<Run> runs = runRepository.findByOwnerId(ownerId);
+
+        if (runs.isEmpty()) {
+            throw new RunDoesNotExistException("No runs found for owner with id " + ownerId);
+        }
+
+        return runs.stream()
                 .map(runMapper::toDto)
                 .toList();
     }
@@ -104,8 +109,12 @@ public class RunService {
      * Retrieve runs by owner username.
      */
     public List<RunDTO> getRunsByOwnerUsername(String username) {
-        return runRepository.findByOwnerUsername(username)
-                .stream()
+        List<Run> runs = runRepository.findByOwnerUsername(username);
+        if (runs.isEmpty()) {
+            throw new RunDoesNotExistException("No runs found for owner with username " + username);
+        }
+
+        return runs.stream()
                 .map(runMapper::toDto)
                 .toList();
     }

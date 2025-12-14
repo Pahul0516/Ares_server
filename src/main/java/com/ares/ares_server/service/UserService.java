@@ -65,8 +65,8 @@ public class UserService {
 
     public UserStatsDTO getUserStats(String email) {
         UserStatsDTO userStatsDTO = new UserStatsDTO();
-        Optional<User> user = userRepository.findByEmail(email);
-        List<Run> runs = runRepository.findByOwnerId(user.get().getId());
+        UserDTO user =  getUserByEmail(email);
+        List<Run> runs = runRepository.findByOwnerId(user.getId());
         double totalArea = 0;
         int totalDuration = 0;
         int totalDistance = 0;
@@ -74,7 +74,7 @@ public class UserService {
             totalDistance+=run.getDistance();
             totalDuration+=run.getDuration();
         }
-        List<Zone> zones = zoneRepository.findByOwnerId(user.get().getId());
+        List<Zone> zones = zoneRepository.findByOwnerId(user.getId());
         for (Zone zone : zones) {
             totalArea+=zone.getArea();
         }

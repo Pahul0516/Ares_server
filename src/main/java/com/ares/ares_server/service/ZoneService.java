@@ -58,8 +58,13 @@ public class ZoneService {
      * Retrieve zones by owner ID.
      */
     public List<ZoneDTO> getZonesByOwner(UUID ownerId) {
-        return zoneRepository.findByOwnerId(ownerId)
-                .stream()
+        List<Zone> zones = zoneRepository.findByOwnerId(ownerId);
+
+        if (zones.isEmpty()) {
+            throw new ZoneDoesNotExistException("No zones found for owner with id " + ownerId);
+        }
+
+        return zones.stream()
                 .map(zoneMapper::toDto)
                 .toList();
     }
