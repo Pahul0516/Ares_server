@@ -103,13 +103,7 @@ public class UserController {
     })
     @GetMapping("/{email}/stats")
     public ResponseEntity<UserStatsDTO> getUserStats(@PathVariable String email) {
-        UserDTO user =  userService.getUserByEmail(email);
-        if(user == null) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-
         UserStatsDTO userStatsDTO = userService.getUserStats(email);
-
         return new ResponseEntity<>(userStatsDTO, HttpStatus.OK);
     }
 }

@@ -6,7 +6,7 @@ import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptions.UserDoesNotExistsException;
 import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.repository.UserRepository;
 import com.ares.ares_server.repository.ZoneRepository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor
@@ -65,8 +64,8 @@ public class UserService {
 
     public UserStatsDTO getUserStats(String email) {
         UserStatsDTO userStatsDTO = new UserStatsDTO();
-        Optional<User> user = userRepository.findByEmail(email);
-        List<Run> runs = runRepository.findByOwnerId(user.get().getId());
+        UserDTO user =  getUserByEmail(email);
+        List<Run> runs = runRepository.findByOwnerId(user.getId());
         double totalArea = 0;
         int totalDuration = 0;
         int totalDistance = 0;
@@ -74,7 +73,7 @@ public class UserService {
             totalDistance+=run.getDistance();
             totalDuration+=run.getDuration();
         }
-        List<Zone> zones = zoneRepository.findByOwnerId(user.get().getId());
+        List<Zone> zones = zoneRepository.findByOwnerId(user.getId());
         for (Zone zone : zones) {
             totalArea+=zone.getArea();
         }

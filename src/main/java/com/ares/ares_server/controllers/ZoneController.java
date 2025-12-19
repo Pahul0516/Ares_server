@@ -4,9 +4,11 @@ import com.ares.ares_server.dto.ZoneDTO;
 import com.ares.ares_server.dto.mappers.ZoneMapper;
 import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.repository.ZoneRepository;
+import com.ares.ares_server.service.ZoneService;
 import io.swagger.v3.oas.annotations.Operation;
 import io.swagger.v3.oas.annotations.responses.ApiResponse;
 import io.swagger.v3.oas.annotations.responses.ApiResponses;
+import lombok.RequiredArgsConstructor;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
@@ -18,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/api/zones")
+@RequiredArgsConstructor
 public class ZoneController {
 
     @Autowired
@@ -26,10 +29,12 @@ public class ZoneController {
     @Autowired
     private ZoneMapper zoneMapper;
 
+    private final ZoneService zoneService;
+
     @Operation(
             summary = "Create a new Zone",
             description = "Create a new zone in the system. This will save a new zone in the database.",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "201", description = "Zone created successfully"),
@@ -37,15 +42,14 @@ public class ZoneController {
     })
     @PostMapping
     public ResponseEntity<ZoneDTO> createZone(@RequestBody ZoneDTO zoneDto) {
-        Zone zone = zoneMapper.fromDto(zoneDto);
-        Zone savedZone = zoneRepository.save(zone);
-        return new ResponseEntity<>(zoneMapper.toDto(savedZone), HttpStatus.CREATED);
+        ZoneDTO createdZone = zoneService.createZone(zoneDto);
+        return new ResponseEntity<>(createdZone, HttpStatus.CREATED);
     }
 
     @Operation(
             summary = "Retrieve all Zones",
             description = "Fetch all zones present in the system.",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Zones retrieved successfully"),
@@ -53,17 +57,13 @@ public class ZoneController {
     })
     @GetMapping
     public ResponseEntity<List<ZoneDTO>> getAllZones() {
-        List<Zone> zones = zoneRepository.findAll();
-        List<ZoneDTO> zoneDtos = zones.stream()
-                .map(zoneMapper::toDto)
-                .toList();
-        return new ResponseEntity<>(zoneDtos, HttpStatus.OK);
+        return ResponseEntity.ok(zoneService.getAllZones());
     }
 
     @Operation(
             summary = "Get Zone by ID",
             description = "Retrieve a zone using its unique identifier (ID).",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Zone found successfully"),
@@ -71,15 +71,13 @@ public class ZoneController {
     })
     @GetMapping("/{id}")
     public ResponseEntity<ZoneDTO> getZoneById(@PathVariable Long id) {
-        Optional<Zone> zone = zoneRepository.findById(id);
-        return zone.map(value -> new ResponseEntity<>(zoneMapper.toDto(value), HttpStatus.OK))
-                .orElseGet(() -> new ResponseEntity<>(HttpStatus.NOT_FOUND));
+        return ResponseEntity.ok(zoneService.getZoneById(id));
     }
 
     @Operation(
             summary = "Get Zones by Owner",
             description = "Retrieve all zones owned by a specific owner.",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Zones found successfully for the owner"),
@@ -87,17 +85,13 @@ public class ZoneController {
     })
     @GetMapping("/owner/{ownerId}")
     public ResponseEntity<List<ZoneDTO>> getZonesByOwner(@PathVariable UUID ownerId) {
-        List<Zone> zones = zoneRepository.findByOwnerId(ownerId);
-        List<ZoneDTO> zoneDtos = zones.stream()
-                .map(zoneMapper::toDto)
-                .toList();
-        return new ResponseEntity<>(zoneDtos, HttpStatus.OK);
+        return ResponseEntity.ok(zoneService.getZonesByOwner(ownerId));
     }
 
     @Operation(
             summary = "Update Zone",
             description = "Update an existing zone by its unique ID.",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "200", description = "Zone updated successfully"),
@@ -105,20 +99,17 @@ public class ZoneController {
             @ApiResponse(responseCode = "400", description = "Invalid zone data provided")
     })
     @PutMapping("/{id}")
-    public ResponseEntity<ZoneDTO> updateZone(@PathVariable Long id, @RequestBody ZoneDTO updatedZoneDto) {
-        if (!zoneRepository.existsById(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        Zone updatedZone = zoneMapper.fromDto(updatedZoneDto);
-        updatedZone.setId(id); // Ensure the ID is set for update
-        Zone savedZone = zoneRepository.save(updatedZone);
-        return new ResponseEntity<>(zoneMapper.toDto(savedZone), HttpStatus.OK);
+    public ResponseEntity<ZoneDTO> updateZone(
+            @PathVariable Long id,
+            @RequestBody ZoneDTO updatedZoneDto
+    ) {
+        return ResponseEntity.ok(zoneService.updateZone(id, updatedZoneDto));
     }
 
     @Operation(
             summary = "Delete Zone",
             description = "Delete a zone from the system by its unique ID.",
-            tags = { "Zone Operations" }
+            tags = {"Zone Operations"}
     )
     @ApiResponses(value = {
             @ApiResponse(responseCode = "204", description = "Zone deleted successfully"),
@@ -126,10 +117,7 @@ public class ZoneController {
     })
     @DeleteMapping("/{id}")
     public ResponseEntity<Void> deleteZone(@PathVariable Long id) {
-        if (!zoneRepository.existsById(id)) {
-            return new ResponseEntity<>(HttpStatus.NOT_FOUND);
-        }
-        zoneRepository.deleteById(id);
+        zoneService.deleteZone(id);
         return new ResponseEntity<>(HttpStatus.NO_CONTENT);
     }
 }

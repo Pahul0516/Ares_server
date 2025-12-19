@@ -2,7 +2,7 @@ package com.ares.ares_server.controllers;
 
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptions.UserDoesNotExistsException;
 import com.ares.ares_server.service.UserService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -160,9 +160,6 @@ class UserControllerUnitTest {
     void getUserStats_success() throws Exception {
         String email = "stats@test.com";
 
-        UserDTO userDTO = new UserDTO(new UUID(1, 3), "john", email, null);
-        when(userService.getUserByEmail(email)).thenReturn(userDTO);
-
         UserStatsDTO statsDTO = new UserStatsDTO();
         statsDTO.setTotalDistance(300);
         statsDTO.setTimeRunning(180);
@@ -176,21 +173,22 @@ class UserControllerUnitTest {
                 .andExpect(jsonPath("$.timeRunning").value(180))
                 .andExpect(jsonPath("$.totalArea").value(30.5));
 
-        verify(userService).getUserByEmail(email);
         verify(userService).getUserStats(email);
     }
 
     @Test
     void getUserStats_userNotFound() throws Exception {
         String email = "missing@test.com";
+        String expectedMessage = "User with email " + email + " does not exist";
 
-        when(userService.getUserByEmail(email)).thenReturn(null);
+        when(userService.getUserStats(email))
+                .thenThrow(new UserDoesNotExistsException(expectedMessage));
 
         mockMvc.perform(get("/api/users/{email}/stats", email))
-                .andExpect(status().isNotFound());
+                .andExpect(status().isNotFound())
+                .andExpect(content().string(expectedMessage));
 
-        verify(userService).getUserByEmail(email);
-        verify(userService, never()).getUserStats(anyString());
+        verify(userService).getUserStats(email);
     }
 
 }

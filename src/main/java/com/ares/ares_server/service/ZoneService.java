@@ -3,6 +3,9 @@ package com.ares.ares_server.service;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
 import com.ares.ares_server.domain.Zone;
+import com.ares.ares_server.dto.ZoneDTO;
+import com.ares.ares_server.dto.mappers.ZoneMapper;
+import com.ares.ares_server.exceptions.ZoneDoesNotExistException;
 import com.ares.ares_server.repository.ZoneRepository;
 import com.ares.ares_server.utils.GeometryProjectionUtil;
 import lombok.RequiredArgsConstructor;
@@ -13,6 +16,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.OffsetDateTime;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 @Service
 @RequiredArgsConstructor
@@ -20,6 +24,78 @@ public class ZoneService {
 
     private final ZoneRepository zoneRepository;
     private static final double AREA_EPSILON = 30;
+    private final ZoneMapper zoneMapper;
+
+    @Transactional
+    public ZoneDTO createZone(ZoneDTO zoneDto) {
+        Zone zone = zoneMapper.fromDto(zoneDto);
+        Zone savedZone = zoneRepository.save(zone);
+        return zoneMapper.toDto(savedZone);
+    }
+
+    /**
+     * Retrieve all zones.
+     */
+    public List<ZoneDTO> getAllZones() {
+        return zoneRepository.findAll()
+                .stream()
+                .map(zoneMapper::toDto)
+                .toList();
+    }
+
+    /**
+     * Retrieve a zone by ID.
+     */
+    public ZoneDTO getZoneById(Long id) {
+        Zone zone = zoneRepository.findById(id)
+                .orElseThrow(() ->
+                        new ZoneDoesNotExistException("Zone with id " + id + " does not exist!")
+                );
+        return zoneMapper.toDto(zone);
+    }
+
+    /**
+     * Retrieve zones by owner ID.
+     */
+    public List<ZoneDTO> getZonesByOwner(UUID ownerId) {
+        List<Zone> zones = zoneRepository.findByOwnerId(ownerId);
+
+        if (zones.isEmpty()) {
+            throw new ZoneDoesNotExistException("No zones found for owner with id " + ownerId);
+        }
+
+        return zones.stream()
+                .map(zoneMapper::toDto)
+                .toList();
+    }
+
+    /**
+     * Update an existing zone.
+     */
+    @Transactional
+    public ZoneDTO updateZone(Long id, ZoneDTO updatedZoneDto) {
+        if (!zoneRepository.existsById(id)) {
+            throw new ZoneDoesNotExistException("Zone with id " + id + " does not exist!");
+        }
+
+        Zone zone = zoneMapper.fromDto(updatedZoneDto);
+        zone.setId(id);
+
+        Zone savedZone = zoneRepository.save(zone);
+        return zoneMapper.toDto(savedZone);
+    }
+
+    /**
+     * Delete a zone.
+     */
+    @Transactional
+    public void deleteZone(Long id) {
+        if (!zoneRepository.existsById(id)) {
+            throw new ZoneDoesNotExistException("Zone with id " + id + " does not exist!");
+        }
+        zoneRepository.deleteById(id);
+    }
+
 
     @Transactional
     public void updateZonesForRun(Run run) {

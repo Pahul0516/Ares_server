@@ -5,9 +5,9 @@ import com.ares.ares_server.dto.AuthDTO;
 import com.ares.ares_server.dto.CredentialsDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
-import com.ares.ares_server.exceptios.InvalidCredentialsException;
-import com.ares.ares_server.exceptios.UserAlreadyExistsException;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptions.InvalidCredentialsException;
+import com.ares.ares_server.exceptions.UserAlreadyExistsException;
+import com.ares.ares_server.exceptions.UserDoesNotExistsException;
 import com.ares.ares_server.repository.UserRepository;
 import io.jsonwebtoken.JwtException;
 import io.jsonwebtoken.Jwts;
@@ -20,7 +20,6 @@ import org.springframework.stereotype.Service;
 import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
-
 
 @Service
 @RequiredArgsConstructor
@@ -35,7 +34,7 @@ public class AuthService {
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    private Key getSigningKey() {
+    Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
@@ -101,7 +100,6 @@ public class AuthService {
     }
 
     // Add these methods to your AuthService class
-
     public String extractUsername(String token) {
         try {
             return Jwts.parserBuilder()

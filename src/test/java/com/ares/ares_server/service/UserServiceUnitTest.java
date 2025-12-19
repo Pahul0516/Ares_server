@@ -6,7 +6,7 @@ import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptions.UserDoesNotExistsException;
 import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.repository.UserRepository;
 import com.ares.ares_server.repository.ZoneRepository;
@@ -94,9 +94,7 @@ public class UserServiceUnitTest {
         String email = "wrong_email";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.getUserByEmail(email);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.getUserByEmail(email));
 
         verify(userRepository).findByEmail(email);
     }
@@ -128,9 +126,7 @@ public class UserServiceUnitTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.updateUser(email, updateDto);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.updateUser(email, updateDto));
 
         verify(userRepository).findByEmail(email);
         verify(userRepository, never()).save(any());
@@ -153,9 +149,7 @@ public class UserServiceUnitTest {
         String email = "new@x.com";
         when(userRepository.existsByEmail(email)).thenReturn(false);
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.deleteUser(email);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.deleteUser(email));
 
         verify(userRepository).existsByEmail(email);
     }
@@ -171,6 +165,9 @@ public class UserServiceUnitTest {
 
         when(userRepository.findByEmail(email))
                 .thenReturn(Optional.of(user));
+
+        when(userMapper.toDto(user))
+                .thenReturn(new UserDTO(userId, null, email, null));
 
         Run r1 = new Run();
         r1.setDistance(100F);
