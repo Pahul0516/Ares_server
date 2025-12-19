@@ -2,7 +2,7 @@ package com.ares.ares_server.controllers;
 
 import com.ares.ares_server.dto.RunDTO;
 import com.ares.ares_server.dto.UserDTO;
-import com.ares.ares_server.exceptios.RunDoesNotExistException;
+import com.ares.ares_server.exceptions.RunDoesNotExistException;
 import com.ares.ares_server.service.RunService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

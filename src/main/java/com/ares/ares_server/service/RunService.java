@@ -3,7 +3,7 @@ package com.ares.ares_server.service;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.dto.RunDTO;
 import com.ares.ares_server.dto.mappers.RunMapper;
-import com.ares.ares_server.exceptios.RunDoesNotExistException;
+import com.ares.ares_server.exceptions.RunDoesNotExistException;
 import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.utils.GeometryProjectionUtil;
 import lombok.RequiredArgsConstructor;

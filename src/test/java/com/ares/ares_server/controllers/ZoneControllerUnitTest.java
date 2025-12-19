@@ -2,7 +2,7 @@ package com.ares.ares_server.controllers;
 
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.ZoneDTO;
-import com.ares.ares_server.exceptios.ZoneDoesNotExistException;
+import com.ares.ares_server.exceptions.ZoneDoesNotExistException;
 import com.ares.ares_server.service.ZoneService;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.datatype.jsr310.JavaTimeModule;

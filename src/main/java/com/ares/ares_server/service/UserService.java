@@ -6,7 +6,7 @@ import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
-import com.ares.ares_server.exceptios.UserDoesNotExistsException;
+import com.ares.ares_server.exceptions.UserDoesNotExistsException;
 import com.ares.ares_server.repository.RunRepository;
 import com.ares.ares_server.repository.UserRepository;
 import com.ares.ares_server.repository.ZoneRepository;
@@ -15,7 +15,6 @@ import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
 import java.util.List;
-import java.util.Optional;
 
 @Service
 @RequiredArgsConstructor

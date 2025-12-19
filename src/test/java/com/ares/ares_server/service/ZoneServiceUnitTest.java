@@ -5,7 +5,7 @@ import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.ZoneDTO;
 import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.domain.User;
-import com.ares.ares_server.exceptios.ZoneDoesNotExistException;
+import com.ares.ares_server.exceptions.ZoneDoesNotExistException;
 import com.ares.ares_server.repository.ZoneRepository;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;

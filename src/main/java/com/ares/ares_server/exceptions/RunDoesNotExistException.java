@@ -1,4 +1,4 @@
-package com.ares.ares_server.exceptios;
+package com.ares.ares_server.exceptions;
 
 public class RunDoesNotExistException extends RuntimeException {
     public RunDoesNotExistException(String message) {
