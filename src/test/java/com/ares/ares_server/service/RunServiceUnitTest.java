@@ -206,7 +206,7 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void getRunsByOwner_notFound() throws Exception {
+    void getRunsByOwner_notFound() {
         when(runRepository.findByOwnerId(owner.getId())).thenReturn(Collections.emptyList());
 
         assertThrows(RunDoesNotExistException.class, () -> runService.getRunsByOwner(owner.getId()));
