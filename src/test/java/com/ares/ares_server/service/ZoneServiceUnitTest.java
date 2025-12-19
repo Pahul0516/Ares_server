@@ -88,7 +88,7 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void createZone_success() throws Exception {
+    void createZone_success() {
         Zone zone = createSampleZone(1L);
         ZoneDTO inputDto = createSampleZoneDTO(1L);
 
@@ -108,7 +108,7 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void getAllZones_success() throws Exception {
+    void getAllZones_success() {
         Zone zone1 = createSampleZone(1L);
         Zone zone2 = createSampleZone(2L);
         ZoneDTO dto1 = createSampleZoneDTO(1L);
@@ -131,7 +131,7 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void getZoneById_found() throws Exception {
+    void getZoneById_found() {
         Zone zone = createSampleZone(1L);
         ZoneDTO dto = createSampleZoneDTO(1L);
 
@@ -148,18 +148,16 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void getZoneById_notFound() throws Exception {
+    void getZoneById_notFound() {
         when(zoneRepository.findById(99L)).thenReturn(Optional.empty());
 
-        assertThrows(ZoneDoesNotExistException.class, () -> {
-            zoneService.getZoneById(99L);
-        });
+        assertThrows(ZoneDoesNotExistException.class, () -> zoneService.getZoneById(99L));
 
         verify(zoneRepository).findById(99L);
     }
 
     @Test
-    void updateZone_success() throws Exception {
+    void updateZone_success() {
         ZoneDTO inputDto = createSampleZoneDTO(null);
         Zone zoneEntity = createSampleZone(1L);
         ZoneDTO resultDto = createSampleZoneDTO(1L);
@@ -184,13 +182,11 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void updateZone_notFound() throws Exception {
+    void updateZone_notFound() {
         ZoneDTO inputDto = createSampleZoneDTO(null);
         when(zoneRepository.existsById(1L)).thenReturn(false);
 
-        assertThrows(ZoneDoesNotExistException.class, () -> {
-            zoneService.updateZone(1L, inputDto);
-        });
+        assertThrows(ZoneDoesNotExistException.class, () -> zoneService.updateZone(1L, inputDto));
 
         verify(zoneRepository).existsById(1L);
         verify(zoneMapper, never()).fromDto(any());
@@ -198,7 +194,7 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void deleteZone_success() throws Exception {
+    void deleteZone_success() {
         when(zoneRepository.existsById(1L)).thenReturn(true);
         doNothing().when(zoneRepository).deleteById(1L);
 
@@ -209,19 +205,17 @@ class ZoneServiceUnitTest {
     }
 
     @Test
-    void deleteZone_notFound() throws Exception {
+    void deleteZone_notFound() {
         when(zoneRepository.existsById(99L)).thenReturn(false);
 
-        assertThrows(ZoneDoesNotExistException.class, () -> {
-            zoneService.deleteZone(99L);
-        });
+        assertThrows(ZoneDoesNotExistException.class, () -> zoneService.deleteZone(99L));
 
         verify(zoneRepository).existsById(99L);
         verify(zoneRepository, never()).deleteById(any());
     }
 
     @Test
-    void getZonesByOwner_success() throws Exception {
+    void getZonesByOwner_success() {
         Zone zone1 = createSampleZone(1L);
         Zone zone2 = createSampleZone(2L);
 

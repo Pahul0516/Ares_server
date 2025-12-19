@@ -50,14 +50,6 @@ class RunServiceUnitTest {
         return geometryFactory.createPolygon(coords);
     }
 
-    private Polygon createUnclosedPolygon() {
-        Coordinate[] coords = {
-                new Coordinate(0, 0), new Coordinate(1, 0),
-                new Coordinate(1, 1), new Coordinate(0, 1),
-        };
-        return geometryFactory.createPolygon(coords);
-    }
-
     private Map<String, Object> polygonToGeoJson(Polygon polygon) {
         Map<String, Object> geoJson = new HashMap<>();
         geoJson.put("type", "Polygon");
@@ -86,7 +78,7 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void createRun_success_closedPolygon() throws Exception {
+    void createRun_success_closedPolygon(){
         Polygon runPolygon = createClosedPolygon();
         inputDto = new RunDTO(
                 null,
@@ -139,7 +131,7 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void getAllRuns_returnsList() throws Exception {
+    void getAllRuns_returnsList(){
         Run r1 = new Run(); r1.setId(1L); r1.setOwner(owner);
         Run r2 = new Run(); r2.setId(2L); r2.setOwner(owner);
 
@@ -163,7 +155,7 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void getRunById_found() throws Exception {
+    void getRunById_found(){
         Run run = new Run(); run.setId(1L); run.setOwner(owner);
         RunDTO dto = new RunDTO(1L, null, ownerDto, null, null, null, null);
 
@@ -181,18 +173,16 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void getRunById_notFound() throws Exception {
+    void getRunById_notFound(){
         when(runRepository.findById(1L)).thenReturn(Optional.empty());
 
-        assertThrows(RunDoesNotExistException.class, () -> {
-            runService.getRunById(1L);
-        });
+        assertThrows(RunDoesNotExistException.class, () -> runService.getRunById(1L));
 
         verify(runRepository).findById(1L);
     }
 
     @Test
-    void getRunsByOwner_returnsList() throws Exception {
+    void getRunsByOwner_returnsList() {
         Run r1 = new Run(); r1.setId(1L); r1.setOwner(owner);
         Run r2 = new Run(); r2.setId(2L); r2.setOwner(owner);
 
@@ -219,15 +209,13 @@ class RunServiceUnitTest {
     void getRunsByOwner_notFound() throws Exception {
         when(runRepository.findByOwnerId(owner.getId())).thenReturn(Collections.emptyList());
 
-        assertThrows(RunDoesNotExistException.class, () -> {
-            runService.getRunsByOwner(owner.getId());
-        });
+        assertThrows(RunDoesNotExistException.class, () -> runService.getRunsByOwner(owner.getId()));
 
         verify(runRepository).findByOwnerId(owner.getId());
     }
 
     @Test
-    void getRunsByOwnerUsername_returnsList() throws Exception {
+    void getRunsByOwnerUsername_returnsList() {
         Run r1 = new Run(); r1.setId(1L); r1.setOwner(owner);
         Run r2 = new Run(); r2.setId(2L); r2.setOwner(owner);
 
@@ -251,18 +239,16 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void getRunsByOwnerUsername_notFound() throws Exception {
+    void getRunsByOwnerUsername_notFound() {
         when(runRepository.findByOwnerUsername(owner.getUsername())).thenReturn(Collections.emptyList());
 
-        assertThrows(RunDoesNotExistException.class, () -> {
-            runService.getRunsByOwnerUsername(owner.getUsername());
-        });
+        assertThrows(RunDoesNotExistException.class, () -> runService.getRunsByOwnerUsername(owner.getUsername()));
 
         verify(runRepository).findByOwnerUsername(owner.getUsername());
     }
 
     @Test
-    void updateRun_success() throws Exception {
+    void updateRun_success() {
         Long runId = 1L;
         Float newDistance = 10f;
         RunDTO updatedDto = new RunDTO(null, null, null, newDistance, null, null, null);
@@ -290,14 +276,12 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void updateRun_notFound() throws Exception {
+    void updateRun_notFound() {
         RunDTO updatedDto = new RunDTO(null, null, null, null, null, null, null);
 
         when(runRepository.existsById(2L)).thenReturn(false);
 
-        assertThrows(RunDoesNotExistException.class, () -> {
-            runService.updateRun(2L, updatedDto);
-        });
+        assertThrows(RunDoesNotExistException.class, () -> runService.updateRun(2L, updatedDto));
 
         verify(runRepository).existsById(2L);
         verify(runMapper, never()).fromDto(any());
@@ -305,7 +289,7 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void deleteRun_success() throws Exception {
+    void deleteRun_success() {
         when(runRepository.existsById(1L)).thenReturn(true);
         doNothing().when(runRepository).deleteById(1L);
 
@@ -316,12 +300,10 @@ class RunServiceUnitTest {
     }
 
     @Test
-    void deleteRun_notFound() throws Exception {
+    void deleteRun_notFound() {
         when(runRepository.existsById(2L)).thenReturn(false);
 
-        assertThrows(RunDoesNotExistException.class, () -> {
-            runService.deleteRun(2L);
-        });
+        assertThrows(RunDoesNotExistException.class, () -> runService.deleteRun(2L));
 
         verify(runRepository).existsById(2L);
         verify(runRepository, never()).deleteById(2L);

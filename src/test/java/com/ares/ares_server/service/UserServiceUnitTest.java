@@ -94,9 +94,7 @@ public class UserServiceUnitTest {
         String email = "wrong_email";
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.getUserByEmail(email);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.getUserByEmail(email));
 
         verify(userRepository).findByEmail(email);
     }
@@ -128,9 +126,7 @@ public class UserServiceUnitTest {
 
         when(userRepository.findByEmail(email)).thenReturn(Optional.empty());
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.updateUser(email, updateDto);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.updateUser(email, updateDto));
 
         verify(userRepository).findByEmail(email);
         verify(userRepository, never()).save(any());
@@ -153,9 +149,7 @@ public class UserServiceUnitTest {
         String email = "new@x.com";
         when(userRepository.existsByEmail(email)).thenReturn(false);
 
-        assertThrows(UserDoesNotExistsException.class, () -> {
-            userService.deleteUser(email);
-        });
+        assertThrows(UserDoesNotExistsException.class, () -> userService.deleteUser(email));
 
         verify(userRepository).existsByEmail(email);
     }
