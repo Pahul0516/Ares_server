@@ -1,4 +1,4 @@
-package com.ares.ares_server.exceptions;
+package com.ares.ares_server.exceptios;
 
 public class InvalidCredentialsException extends RuntimeException {
     public InvalidCredentialsException(String message) {

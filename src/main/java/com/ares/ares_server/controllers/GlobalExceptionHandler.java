@@ -1,8 +1,8 @@
 package com.ares.ares_server.controllers;
 
-import com.ares.ares_server.exceptions.InvalidCredentialsException;
-import com.ares.ares_server.exceptions.UserAlreadyExistsException;
-import com.ares.ares_server.exceptions.UserDoesNotExistsException;
+import com.ares.ares_server.exceptios.InvalidCredentialsException;
+import com.ares.ares_server.exceptios.UserAlreadyExistsException;
+import com.ares.ares_server.exceptios.UserDoesNotExistsException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;

@@ -2,7 +2,7 @@ package com.ares.ares_server.controllers;
 
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
-import com.ares.ares_server.exceptions.UserDoesNotExistsException;
+import com.ares.ares_server.exceptios.UserDoesNotExistsException;
 import com.ares.ares_server.service.UserService;
 import org.junit.jupiter.api.*;
 import org.junit.jupiter.api.extension.ExtendWith;
