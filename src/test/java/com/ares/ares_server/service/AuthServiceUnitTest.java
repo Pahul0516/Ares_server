@@ -9,6 +9,8 @@ import com.ares.ares_server.exceptios.InvalidCredentialsException;
 import com.ares.ares_server.exceptios.UserAlreadyExistsException;
 import com.ares.ares_server.exceptios.UserDoesNotExistsException;
 import com.ares.ares_server.repository.UserRepository;
+import io.jsonwebtoken.Jwts;
+import io.jsonwebtoken.SignatureAlgorithm;
 import org.junit.jupiter.api.BeforeEach;
 import org.junit.jupiter.api.Test;
 import org.junit.jupiter.api.extension.ExtendWith;
@@ -17,6 +19,7 @@ import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
 import org.springframework.test.util.ReflectionTestUtils;
 
+import java.util.Date;
 import java.util.Optional;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -38,6 +41,17 @@ class AuthServiceUnitTest {
     void setUp() {
         ReflectionTestUtils.setField(authService, "jwtSecret", "mySecretKeymySecretKeymySecretKeymySecretKey"); // must be 32+ chars
         ReflectionTestUtils.setField(authService, "jwtExpirationMs", 3600000L); // 1 hour
+    }
+
+    private String generateToken(String email, long expirationMillis) {
+        Date now = new Date();
+        Date expiry = new Date(now.getTime() + expirationMillis);
+        return Jwts.builder()
+                .setSubject(email)
+                .setIssuedAt(now)
+                .setExpiration(expiry)
+                .signWith(SignatureAlgorithm.HS256, authService.getSigningKey())
+                .compact();
     }
 
     @Test
@@ -149,5 +163,62 @@ class AuthServiceUnitTest {
 
         assertNotNull(token);
         verify(userRepository).findByEmail(credentials.getEmail());
+    }
+
+    @Test
+    void extractUsername_validToken_returnsEmail() {
+        String email = "user@test.com";
+        String token = generateToken(email, 3600000);
+
+        String extracted = authService.extractUsername(token);
+
+        assertEquals(email, extracted);
+    }
+
+    @Test
+    void extractUsername_invalidToken_returnsNull() {
+        String token = "invalid.token.value";
+
+        String extracted = authService.extractUsername(token);
+
+        assertNull(extracted);
+    }
+
+    @Test
+    void isTokenValid_validToken_returnsTrue() {
+        String email = "user@test.com";
+        String token = generateToken(email, 3600000);
+
+        boolean valid = authService.isTokenValid(token, email);
+
+        assertTrue(valid);
+    }
+
+    @Test
+    void isTokenValid_wrongEmail_returnsFalse() {
+        String email = "user@test.com";
+        String token = generateToken(email, 3600000);
+
+        boolean valid = authService.isTokenValid(token, "other@test.com");
+
+        assertFalse(valid);
+    }
+
+    @Test
+    void isTokenValid_expiredToken_returnsFalse() {
+        String email = "user@test.com";
+        // Token expired 1 second ago
+        String token = generateToken(email, -1000);
+
+        boolean valid = authService.isTokenValid(token, email);
+
+        assertFalse(valid);
+    }
+
+    @Test
+    void isTokenValid_malformedToken_returnsFalse() {
+        String token = "totally.invalid.jwt";
+        boolean valid = authService.isTokenValid(token, "user@test.com");
+        assertFalse(valid);
     }
 }

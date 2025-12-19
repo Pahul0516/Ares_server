@@ -21,7 +21,6 @@ import java.security.Key;
 import java.util.Date;
 import java.util.Optional;
 
-
 @Service
 @RequiredArgsConstructor
 public class AuthService {
@@ -35,7 +34,7 @@ public class AuthService {
     @Value("${jwt.expiration-ms}")
     private long jwtExpirationMs;
 
-    private Key getSigningKey() {
+    Key getSigningKey() {
         return Keys.hmacShaKeyFor(jwtSecret.getBytes());
     }
 
@@ -101,7 +100,6 @@ public class AuthService {
     }
 
     // Add these methods to your AuthService class
-
     public String extractUsername(String token) {
         try {
             return Jwts.parserBuilder()

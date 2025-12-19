@@ -172,6 +172,9 @@ public class UserServiceUnitTest {
         when(userRepository.findByEmail(email))
                 .thenReturn(Optional.of(user));
 
+        when(userMapper.toDto(user))
+                .thenReturn(new UserDTO(userId, null, email, null));
+
         Run r1 = new Run();
         r1.setDistance(100F);
         r1.setDuration(60);
