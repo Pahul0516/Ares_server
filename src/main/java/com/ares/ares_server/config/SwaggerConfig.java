@@ -1,4 +1,4 @@
-package com.ares.ares_server.security;
+package com.ares.ares_server.config;
 
 import io.swagger.v3.oas.models.Components;
 import io.swagger.v3.oas.models.OpenAPI;

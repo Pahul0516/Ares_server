@@ -1,5 +1,6 @@
 package com.ares.ares_server.controllers;
 
+import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.exceptions.UserDoesNotExistsException;
@@ -189,6 +190,26 @@ class UserControllerUnitTest {
                 .andExpect(content().string(expectedMessage));
 
         verify(userService).getUserStats(email);
+    }
+
+    @Test
+    void updateLeaderboard_returnsTopTenRunners() {
+        RunnerDTO run1 = new RunnerDTO();
+        run1.setUsername("Alice");
+        run1.setScore(120.0);
+
+        RunnerDTO run2 = new RunnerDTO();
+        run2.setUsername("Bob");
+        run2.setScore(110.0);
+
+        List<RunnerDTO> runners = List.of(run1, run2);
+
+        when(userService.getTopTenRunners()).thenReturn(runners);
+
+        List<RunnerDTO> result = userController.updateLeaderboard();
+
+        Assertions.assertEquals(runners, result);
+        verify(userService).getTopTenRunners();
     }
 
 }

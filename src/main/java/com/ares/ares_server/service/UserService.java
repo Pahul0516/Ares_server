@@ -3,6 +3,7 @@ package com.ares.ares_server.service;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
 import com.ares.ares_server.domain.Zone;
+import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
@@ -81,5 +82,20 @@ public class UserService {
         userStatsDTO.setTotalArea(totalArea);
         userStatsDTO.setTotalDistance(totalDistance);
         return userStatsDTO;
+    }
+
+    public List<RunnerDTO> getTopTenRunners() {
+        return getAllUsers().stream()
+                .map(user -> {
+                    RunnerDTO runnerDTO = new RunnerDTO();
+                    runnerDTO.setUsername(user.getUsername());
+                    List<Zone> zones = zoneRepository.findByOwnerId(user.getId());
+                    Double totalDistance = zones.stream().mapToDouble(Zone::getArea).sum();
+                    runnerDTO.setScore(totalDistance);
+                    return runnerDTO;
+                })
+                .sorted((r1, r2) -> Double.compare(r2.getScore(), r1.getScore()))
+                .limit(10)
+                .toList();
     }
 }

@@ -1,4 +1,4 @@
-package com.ares.ares_server.security;
+package com.ares.ares_server.config;
 
 import com.ares.ares_server.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;
@@ -32,6 +32,10 @@ public class SecurityConfig {
                                 "/swagger-resources/**", // Swagger resources
                                 "/webjars/**"           // Swagger dependencies
                         ).permitAll()
+
+//                        .requestMatchers("/ws/info/**").permitAll() // WebSocket endpoint
+                        .requestMatchers("/ws/**").permitAll()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )
