@@ -6,7 +6,6 @@ import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.ZoneDTO;
 import com.ares.ares_server.dto.mappers.ZoneMapper;
 import com.ares.ares_server.exceptions.ZoneDoesNotExistException;
-import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.repository.ZoneRepository;
 import com.ares.ares_server.utils.GeometryProjectionUtil;
 import lombok.RequiredArgsConstructor;

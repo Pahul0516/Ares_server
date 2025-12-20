@@ -1,4 +1,4 @@
-package com.ares.ares_server.utils;
+package com.ares.ares_server.config;
 
 import com.fasterxml.jackson.databind.Module;
 import org.n52.jackson.datatype.jts.JtsModule;

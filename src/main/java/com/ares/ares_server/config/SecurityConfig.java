@@ -1,4 +1,4 @@
-package com.ares.ares_server.security;
+package com.ares.ares_server.config;
 
 import com.ares.ares_server.security.JwtAuthenticationFilter;
 import lombok.RequiredArgsConstructor;

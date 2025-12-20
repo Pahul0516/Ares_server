@@ -1,6 +1,5 @@
 package com.ares.ares_server.controllers;
 
-import com.ares.ares_server.dto.RunDTO;
 import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
