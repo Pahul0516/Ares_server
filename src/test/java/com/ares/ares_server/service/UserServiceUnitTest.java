@@ -3,6 +3,7 @@ package com.ares.ares_server.service;
 import com.ares.ares_server.domain.Run;
 import com.ares.ares_server.domain.User;
 import com.ares.ares_server.domain.Zone;
+import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.dto.mappers.UserMapper;
@@ -201,4 +202,52 @@ public class UserServiceUnitTest {
         verify(runRepository).findByOwnerId(userId);
         verify(zoneRepository).findByOwnerId(userId);
     }
+
+    @Test
+    void getTopTenRunners_returns_sorted_top_10() {
+        // GIVEN
+        UUID u1Id = UUID.randomUUID();
+        UUID u2Id = UUID.randomUUID();
+        UUID u3Id = UUID.randomUUID();
+
+        UserDTO u1 = new UserDTO(u1Id, "alice", null, null);
+        UserDTO u2 = new UserDTO(u2Id, "bob", null, null);
+        UserDTO u3 = new UserDTO(u3Id, "charlie", null, null);
+
+        // spy because getTopTenRunners() calls getAllUsers()
+        UserService spyService = spy(userService);
+        doReturn(List.of(u1, u2, u3)).when(spyService).getAllUsers();
+
+        Zone z1a = new Zone(); z1a.setArea(10.0);
+        Zone z1b = new Zone(); z1b.setArea(20.0); // total = 30
+
+        Zone z2a = new Zone(); z2a.setArea(50.0); // total = 50
+
+        Zone z3a = new Zone(); z3a.setArea(5.0);  // total = 5
+
+        when(zoneRepository.findByOwnerId(u1Id)).thenReturn(List.of(z1a, z1b));
+        when(zoneRepository.findByOwnerId(u2Id)).thenReturn(List.of(z2a));
+        when(zoneRepository.findByOwnerId(u3Id)).thenReturn(List.of(z3a));
+
+        // WHEN
+        List<RunnerDTO> result = spyService.getTopTenRunners();
+
+        // THEN
+        assertEquals(3, result.size());
+
+        // sorted DESC by score
+        assertEquals("bob", result.get(0).getUsername());
+        assertEquals(50.0, result.get(0).getScore());
+
+        assertEquals("alice", result.get(1).getUsername());
+        assertEquals(30.0, result.get(1).getScore());
+
+        assertEquals("charlie", result.get(2).getUsername());
+        assertEquals(5.0, result.get(2).getScore());
+
+        verify(zoneRepository).findByOwnerId(u1Id);
+        verify(zoneRepository).findByOwnerId(u2Id);
+        verify(zoneRepository).findByOwnerId(u3Id);
+    }
+
 }

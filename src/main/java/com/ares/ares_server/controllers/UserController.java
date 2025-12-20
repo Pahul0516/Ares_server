@@ -1,5 +1,6 @@
 package com.ares.ares_server.controllers;
 
+import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.dto.UserDTO;
 import com.ares.ares_server.dto.UserStatsDTO;
 import com.ares.ares_server.service.UserService;
@@ -9,6 +10,8 @@ import io.swagger.v3.oas.annotations.responses.ApiResponses;
 import lombok.RequiredArgsConstructor;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
+import org.springframework.messaging.handler.annotation.MessageMapping;
+import org.springframework.messaging.handler.annotation.SendTo;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.List;
@@ -105,5 +108,11 @@ public class UserController {
     public ResponseEntity<UserStatsDTO> getUserStats(@PathVariable String email) {
         UserStatsDTO userStatsDTO = userService.getUserStats(email);
         return new ResponseEntity<>(userStatsDTO, HttpStatus.OK);
+    }
+
+    @MessageMapping("/leaderboard/update")
+    @SendTo("/topic/leaderboard")
+    public List<RunnerDTO> updateLeaderboard() {
+        return userService.getTopTenRunners();
     }
 }

@@ -32,6 +32,10 @@ public class SecurityConfig {
                                 "/swagger-resources/**", // Swagger resources
                                 "/webjars/**"           // Swagger dependencies
                         ).permitAll()
+
+//                        .requestMatchers("/ws/info/**").permitAll() // WebSocket endpoint
+                        .requestMatchers("/ws/**").permitAll()
+
                         // All other endpoints require authentication
                         .anyRequest().authenticated()
                 )

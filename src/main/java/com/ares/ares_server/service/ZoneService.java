@@ -6,10 +6,12 @@ import com.ares.ares_server.domain.Zone;
 import com.ares.ares_server.dto.ZoneDTO;
 import com.ares.ares_server.dto.mappers.ZoneMapper;
 import com.ares.ares_server.exceptions.ZoneDoesNotExistException;
+import com.ares.ares_server.dto.RunnerDTO;
 import com.ares.ares_server.repository.ZoneRepository;
 import com.ares.ares_server.utils.GeometryProjectionUtil;
 import lombok.RequiredArgsConstructor;
 import org.locationtech.jts.geom.*;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 import org.springframework.stereotype.Service;
 import org.springframework.transaction.annotation.Transactional;
 
@@ -25,6 +27,8 @@ public class ZoneService {
     private final ZoneRepository zoneRepository;
     private static final double AREA_EPSILON = 30;
     private final ZoneMapper zoneMapper;
+    private final SimpMessagingTemplate messagingTemplate;
+    private final UserService userService;
 
     @Transactional
     public ZoneDTO createZone(ZoneDTO zoneDto) {
@@ -94,8 +98,8 @@ public class ZoneService {
             throw new ZoneDoesNotExistException("Zone with id " + id + " does not exist!");
         }
         zoneRepository.deleteById(id);
+        messagingTemplate.convertAndSend("/topic/leaderboard", userService.getTopTenRunners());
     }
-
 
     @Transactional
     public void updateZonesForRun(Run run) {
@@ -131,6 +135,8 @@ public class ZoneService {
 
         // Merge the net conquered area (conquered) and user's touching zones (myZones)
         mergeConqueredIntoUserZones(myZones, runGeom, run.getOwner(), run);
+
+        messagingTemplate.convertAndSend("/topic/leaderboard", userService.getTopTenRunners());
     }
 
     private void subtractRunFromZone(Zone zone, Geometry runGeom) {
@@ -169,6 +175,8 @@ public class ZoneService {
                 zoneRepository.save(newZone);
             }
         }
+
+        messagingTemplate.convertAndSend("/topic/leaderboard", userService.getTopTenRunners());
     }
 
     /**
@@ -246,6 +254,8 @@ public class ZoneService {
         }
 
         run.setDistance((float) runDistance);
+
+        messagingTemplate.convertAndSend("/topic/leaderboard", userService.getTopTenRunners());
     }
 
 
@@ -265,6 +275,8 @@ public class ZoneService {
         zone.setCreatedAt(OffsetDateTime.now());
         zone.setLastUpdated(OffsetDateTime.now());
         zoneRepository.save(zone);
+
+        messagingTemplate.convertAndSend("/topic/leaderboard", userService.getTopTenRunners());
     }
 
 

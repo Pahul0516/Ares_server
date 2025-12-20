@@ -16,6 +16,7 @@ import org.locationtech.jts.geom.Coordinate;
 import org.mockito.InjectMocks;
 import org.mockito.Mock;
 import org.mockito.junit.jupiter.MockitoExtension;
+import org.springframework.messaging.simp.SimpMessagingTemplate;
 
 import java.time.OffsetDateTime;
 import java.util.List;
@@ -36,6 +37,12 @@ class ZoneServiceUnitTest {
 
     @Mock
     private ZoneMapper zoneMapper;
+
+    @Mock
+    private UserService userService;
+
+    @Mock
+    private SimpMessagingTemplate messagingTemplate;
 
     @InjectMocks
     private ZoneService zoneService;
@@ -197,11 +204,13 @@ class ZoneServiceUnitTest {
     void deleteZone_success() {
         when(zoneRepository.existsById(1L)).thenReturn(true);
         doNothing().when(zoneRepository).deleteById(1L);
+        when(userService.getTopTenRunners()).thenReturn(List.of());
 
         zoneService.deleteZone(1L);
 
         verify(zoneRepository).existsById(1L);
         verify(zoneRepository).deleteById(1L);
+        verify(userService).getTopTenRunners();
     }
 
     @Test
