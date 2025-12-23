@@ -12,6 +12,7 @@ import java.util.UUID;
 @Table(name = "users")
 public class User {
     @Id
+    @GeneratedValue
     @Column(name = "id", nullable = false)
     private UUID id;
 

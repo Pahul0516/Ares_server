@@ -27,7 +27,6 @@ class UserMapperUnitTest {
         var userDTO = userMapper.toDto(user);
 
         assertNotNull(userDTO);
-        assertEquals(user.getId(), userDTO.getId());
         assertEquals(user.getUsername(), userDTO.getUsername());
         assertEquals(user.getEmail(), userDTO.getEmail());
         assertEquals(user.getEncryptedPassword(), userDTO.getEncryptedPassword());
@@ -45,7 +44,6 @@ class UserMapperUnitTest {
     @Test
     void fromDtoTest() {
         var userDTO = com.ares.ares_server.dto.UserDTO.builder()
-                .id(UUID.randomUUID())
                 .username("testuser")
                 .email("test@x.com")
                 .encryptedPassword("encryptedPassword123")
@@ -54,7 +52,6 @@ class UserMapperUnitTest {
         var user = userMapper.fromDto(userDTO);
 
         assertNotNull(user);
-        assertEquals(userDTO.getId(), user.getId());
         assertEquals(userDTO.getUsername(), user.getUsername());
         assertEquals(userDTO.getEmail(), user.getEmail());
         assertEquals(userDTO.getEncryptedPassword(), user.getEncryptedPassword());
