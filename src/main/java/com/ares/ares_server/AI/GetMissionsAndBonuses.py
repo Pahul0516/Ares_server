@@ -2,36 +2,27 @@ import json
 import random
 from datetime import datetime
 from huggingface_hub import InferenceClient
+from dotenv import load_dotenv
+import os
 
-HF_API_KEY = "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"
 
-REPO_ID = "meta-llama/Llama-3.2-3B-Instruct"  # Excellent performance, very smart
+api_key = os.getenv("API_KEY_FROM_JAVA")
 
-client = InferenceClient(token=HF_API_KEY)
+if not api_key:
+    print("Error: API_KEY_FROM_JAVA not found in environment.", file=sys.stderr)
+    sys.exit(1)
 
-# 1. Define the Game Context (Inputs)
-# This is the data your app sends to the server when a player starts a session.
-player_context = {
-    "player_id": "runner_01",
-    "level": 8,  # Advanced player
-    "play_style": "Strategist",  # Prefers planning over sprinting
-    "recent_history": "conquered_3_zones",  # AI should try to motivate them
-    "current_conditions": {
-        "time": "13:00",
-        "weather": "Sunny",
-        "location_type": "City center"  # Dense area
-    }
-}
+REPO_ID = "meta-llama/Llama-3.2-3B-Instruct"
 
-# 2. The System Prompt
-# We instruct the AI to act as a Game Master and strictly adhere to a list of allowed IDs.
+client = InferenceClient(token=api_key)
+
 system_prompt = """
-You are an AI Game Master for a GPS strategy game. Your goal is to generate a 'Mission Contract' for a player based on their context.
+You are an AI Game Master for a GPS game where you need to conquer zones from your city. Your goal is to generate a challenge for a player that will be sent by e-mail to them.
 
 ### RULES:
 1. You must output Valid JSON only. Do not add conversational text.
 2. You must choose ONE Challenge Condition and ONE Reward from the supported lists below. Do not pick the same challenge and reward often. Combine them.
-3. Balance the difficulty: If weather is bad, make the challenge easier. If player level is high, make it harder.
+3. Do not be very aggressive, give the challenge steps clearly.
 
 ### SUPPORTED CHALLENGE TYPES:
 - COND_SHAPE: Zone must resemble the shape (target_value) given. You can choose from: star, square, circle, triangle, heart.
@@ -49,6 +40,8 @@ You are an AI Game Master for a GPS strategy game. Your goal is to generate a 'M
 {
   "mission_name": "Creative Name",
   "flavor_text": "Short catchy passive-aggressive encouragement words.",
+  "email_header": "Header of the e-mail",
+  "email_text": "Long description of the challenge, including the type and target values"
   "challenge": {
       "type": "ONE_OF_COND_TYPES",
       "target_value": 100
@@ -61,16 +54,12 @@ You are an AI Game Master for a GPS strategy game. Your goal is to generate a 'M
 """
 
 
-# 3. Generate the Mission
-def generate_mission(context):
-    # Construct the message payload for the chat model
+def generate_mission():
     messages = [
         {"role": "system", "content": system_prompt},
-        {"role": "user", "content": f"CURRENT PLAYER CONTEXT:\n{json.dumps(context)}"}
     ]
 
     try:
-        # Call the Hugging Face Inference API
         response = client.chat_completion(
             model=REPO_ID,
             messages=messages,
@@ -80,8 +69,6 @@ def generate_mission(context):
 
         content = response.choices[0].message.content
 
-        # Cleanup: Smaller models often wrap response in markdown blocks (```json ... ```)
-        # We strip them to ensure json.loads works
         if "```json" in content:
             content = content.split("```json")[1].split("```")[0].strip()
         elif "```" in content:
@@ -91,10 +78,8 @@ def generate_mission(context):
 
     except Exception as e:
         print(f"Error generating mission: {e}")
-        # In a real app, you might print the raw content here to debug if JSON parsing failed
         return None
 
 
-#for i in range(0, 5):
-mission_data = generate_mission(player_context)
+mission_data = generate_mission()
 print(json.dumps(mission_data, indent=2))
