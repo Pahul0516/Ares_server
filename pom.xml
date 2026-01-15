@@ -55,6 +55,13 @@
             <artifactId>spring-orm</artifactId>
         </dependency>
 
+
+        <dependency>
+            <groupId>io.github.cdimascio</groupId>
+            <artifactId>dotenv-java</artifactId>
+            <version>3.0.0</version>
+        </dependency>
+
         <!-- Hibernate Core & Modules (explicit, aligned) -->
         <dependency>
             <groupId>org.hibernate.orm</groupId>
@@ -327,7 +334,17 @@
                         <artifactId>hibernate-validator</artifactId>
                         <version>${hibernate.validator.version}</version>
                     </dependency>
+
+                    <dependency>
+                        <groupId>com.fasterxml.jackson.core</groupId>
+                        <artifactId>jackson-databind</artifactId>
+                        <version>2.15.2</version> <!-- or the latest stable version -->
+                    </dependency>
+
+
                 </dependencies>
+
+
 
                 <configuration>
                     <!-- The properties file will supply DB, referenceUrl, etc. -->
