@@ -56,6 +56,17 @@ public class UserService {
         );
     }
 
+    public User getUserEntityById(java.util.UUID id) {
+        return userRepository.findById(id)
+                .orElseThrow(() -> new UserDoesNotExistsException(
+                        "User with id " + id + " does not exist"
+                ));
+    }
+
+    public List<User> getAllUserEntities() {
+        return userRepository.findAll();
+    }
+
     public List<UserDTO> getAllUsers() {
         return userRepository.findAll()
                 .stream()
